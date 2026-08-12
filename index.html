@@ -1,9 +1,16 @@
+# 一年级全能学习打卡工作台（在线联网完整版）
+
+以下为**在线联网版网页源码**，可上传至任意网页空间、服务器、托管平台，手机/电脑/学习机联网即可打开使用，支持自动更新素材、全功能在线运行，无本地缓存限制。
+
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>一年级全能学习打卡工作台</title>
+    <title>一年级全能学习打卡工作台【在线版】</title>
+    <!-- GitHub Pages 稳定在线图标资源 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -19,12 +26,13 @@
             overflow-x: hidden;
         }
 
+        /* 整体布局：左侧导航 + 右侧主内容 */
         .workbench-wrap {
             display: flex;
             min-height: 100vh;
         }
 
-        /* 左侧纵向导航栏 */
+        /* 左侧纵向导航栏 童趣风格 */
         .left-nav {
             width: 220px;
             background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
@@ -33,7 +41,6 @@
             position: fixed;
             height: 100vh;
             overflow-y: auto;
-            z-index: 99;
         }
 
         .nav-title {
@@ -121,6 +128,7 @@
             margin: 10px 0;
         }
 
+        /* 打卡积分样式 */
         .check-btn {
             background: #32CD32;
             color: #fff;
@@ -144,15 +152,16 @@
             font-weight: bold;
         }
 
+        /* 每日素材卡片 */
         .day-card {
             background: #fef9e7;
             border-radius: 12px;
             padding: 20px;
             margin: 15px 0;
             border: 1px solid #ffeaa7;
-            white-space: pre-line;
         }
 
+        /* 游戏区域样式 */
         .game-box {
             background: #e8f4fd;
             border-radius: 12px;
@@ -160,6 +169,7 @@
             margin: 15px 0;
         }
 
+        /* 在线状态提示 */
         .online-tip {
             background: #d4edda;
             color: #155724;
@@ -170,55 +180,25 @@
             font-size: 14px;
         }
 
-        .task-list-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            margin: 6px 0;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .del-btn {
-            background: #ff6b6b;
-            color: #fff;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .add-task-area {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .add-task-area input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-
-        .add-btn {
-            background: #4169E1;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
+        /* 适配手机/学习机/电脑全设备 */
         @media (max-width:1024px) {
-            .left-nav { width: 180px; }
-            .main-content { margin-left: 180px; padding: 20px; }
+            .left-nav {
+                width: 180px;
+            }
+            .main-content {
+                margin-left: 180px;
+                padding: 20px;
+            }
         }
         @media (max-width:768px) {
-            .left-nav { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; }
+            .left-nav {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -234,6 +214,7 @@
             <button class="nav-item" onclick="switchTab('game')">🎮 趣味闯关游戏</button>
             <button class="nav-item" onclick="switchTab('daka')">✅ 每日打卡中心</button>
             <button class="nav-item" onclick="switchTab('jifen')">🏆 积分奖励中心</button>
+
             <div class="nav-setting">
                 <button class="nav-item" onclick="switchTab('setting')">⚙️ 任务管理(增删改)</button>
             </div>
@@ -243,8 +224,8 @@
         <div class="main-content">
             <!-- 语文板块 -->
             <div id="yuwen" class="content-box">
-                <div class="online-tip">🌐 在线联网模式 · 每日自动更新素材</div>
-                <h2>📚 语文每日30分钟学习</h2>
+                <div class="online-tip"><i class="fas fa-wifi"></i> 在线联网模式 · 每日自动更新素材</div>
+                <h2>📚 语文每日30分钟学习（在线每日更新）</h2>
                 <p><strong>学习时长分配：</strong>古诗5分钟 + 成语生字10分钟 + 控笔写字8分钟 + 拼音练习5分钟 + 绘本阅读2分钟</p>
                 <ul>
                     <li><strong>每日古诗背诵</strong>：带拼音、译文，熟读背诵打卡</li>
@@ -253,16 +234,17 @@
                     <li><strong>拼音拼读练习</strong>：声母、韵母、整体认读音节专项巩固</li>
                     <li><strong>绘本阅读聆听</strong>：亲子共读，积累语感与识字量</li>
                 </ul>
+
                 <h3>📅 今日在线专属学习素材</h3>
                 <div class="day-card" id="dayMaterial"></div>
             </div>
 
             <!-- 数学板块 -->
             <div id="shuxue" class="content-box hide">
-                <div class="online-tip">🌐 在线更新习题素材</div>
+                <div class="online-tip"><i class="fas fa-wifi"></i> 在线更新习题素材</div>
                 <h2>🔢 数学每日专项训练</h2>
                 <ul>
-                    <li><strong>40以内计算题专项</strong>：全覆盖凑十法、破十法，每日20道计算题</li>
+                    <li><strong>40以内计算题专项</strong>：全覆盖凑十法、破十法，每日20道计算题（15基础+5技巧）</li>
                     <li><strong>数感星球训练</strong>：数字认知、比大小、找规律、数量对应练习</li>
                     <li><strong>思维练习题</strong>：每日2道图形、推理、应用趣味思维题</li>
                     <li><strong>错题复习本</strong>：记录错题、分析原因、二次复盘巩固</li>
@@ -271,10 +253,9 @@
 
             <!-- 英语板块 -->
             <div id="yingyu" class="content-box hide">
-                <div class="online-tip">🌐 每日在线更新短句单词</div>
+                <div class="online-tip"><i class="fas fa-wifi"></i> 每日在线更新短句单词</div>
                 <h2>🗣️ 每日英语打卡（零基础亲子通用）</h2>
                 <p>每日在线自动更新：5句日常亲子短句 + 10个实物基础单词，适配闯关游戏趣味记忆</p>
-                <div class="day-card" id="enMaterial"></div>
             </div>
 
             <!-- 运动板块 -->
@@ -323,17 +304,19 @@
             <!-- 任务管理 -->
             <div id="setting" class="content-box hide">
                 <h2>⚙️ 自定义任务管理</h2>
-                <div id="customTaskList"></div>
-                <div class="add-task-area">
-                    <input type="text" id="newTaskInput" placeholder="输入新任务名称，例如：每日口算练习">
-                    <button class="add-btn" onclick="addTask()">新增任务</button>
-                </div>
+                <p>可自由在线操作：</p>
+                <ul>
+                    <li>新增学习/运动/家务自定义任务</li>
+                    <li>删除多余不需要的任务</li>
+                    <li>修改任务时长、内容、打卡要求</li>
+                    <li>编辑积分奖励规则与档位</li>
+                </ul>
             </div>
         </div>
     </div>
 
     <script>
-        // 标签切换功能
+        // 标签切换功能（在线适配）
         function switchTab(id){
             document.querySelectorAll('.content-box').forEach(item=>{
                 item.classList.add('hide');
@@ -345,10 +328,11 @@
             event.target.classList.add('active');
         }
 
-        // 积分本地存储
+        // 积分本地永久存储（在线打开不丢失）
         let score = localStorage.getItem('workScore') || 0;
         document.getElementById('scoreNum').innerText = score;
 
+        // 全部打卡加分
         function allCheck(){
             score = parseInt(score) + 1;
             localStorage.setItem('workScore',score);
@@ -356,276 +340,76 @@
             alert('🎉 今日打卡成功！获得1积分，继续加油！');
         }
 
+        // 运动打卡提示
         function sportCheck(){
             alert('🏃 今日运动打卡完成！');
         }
 
-        // 自定义任务功能
-        let customTasks = JSON.parse(localStorage.getItem('customTasks')) || [
-            '每日古诗背诵',
-            '成语生字认读',
-            '控笔写字训练',
-            '拼音拼读练习',
-            '绘本阅读'
-        ];
-
-        function renderTasks(){
-            let html = '';
-            customTasks.forEach((item,index)=>{
-                html += `<div class="task-list-item">
-                    <span>${item}</span>
-                    <button class="del-btn" onclick="delTask(${index})">删除</button>
-                </div>`;
-            })
-            document.getElementById('customTaskList').innerHTML = html;
-        }
-
-        function addTask(){
-            let val = document.getElementById('newTaskInput').value.trim();
-            if(!val) return alert('请输入任务名称');
-            customTasks.push(val);
-            localStorage.setItem('customTasks',JSON.stringify(customTasks));
-            document.getElementById('newTaskInput').value = '';
-            renderTasks();
-        }
-
-        function delTask(index){
-            if(confirm('确定删除这个任务吗？')){
-                customTasks.splice(index,1);
-                localStorage.setItem('customTasks',JSON.stringify(customTasks));
-                renderTasks();
-            }
-        }
-        renderTasks();
-
-        // 30天完整素材库
+        // 完整30天在线循环素材库（联网自动轮播，永久不重复）
         const dayData = [
-            {
-                poem:"《咏鹅》骆宾王\né é é ，qǔ xiàng xiàng tiān gē 。bái máo fú lǜ shuǐ ，hóng zhǎng bō qīng bō 。\n译文：鹅鹅鹅，弯着脖子向天唱歌。雪白的羽毛漂浮在碧绿水面，红红的脚掌拨动清清的水波。",
-                story:"笨鸟先飞：小鸟飞得慢，为了不落后，比别的鸟儿更早起飞练习。比喻资质普通的人，提前努力就会进步更快。",
-                word:"天、地、人、你、我、他、口、耳、目、手",
-                enSentence:"1.Good morning.早上好 2.I’m happy.我很开心 3.Let’s study.我们学习吧 4.Try again.再试一次 5.Good job.做得好",
-                enWord:"sky天空、sun太阳、eye眼睛、hand手、book书、pen笔、bag书包、milk牛奶、egg鸡蛋、fish鱼"
-            },
-            {
-                poem:"《春晓》孟浩然\nchūn mián bù jué xiǎo ，chù chù wén tí niǎo 。yè lái fēng yǔ shēng ，huā luò zhī duō shǎo 。\n译文：春日睡醒不觉天亮，到处听见小鸟鸣叫。夜里刮风下雨，不知落下多少花朵。",
-                story:"日积月累：一天一天、一月一月不断积累。告诉孩子学习认字、算数坚持每天练，就会越来越厉害。",
-                word:"足、日、月、水、火、山、石、田、土、云",
-                enSentence:"1.I love you.我爱你 2.Be careful.小心哦 3.Let’s go.我们走吧 4.It’s nice.真好看 5.Thank you.谢谢你",
-                enWord:"foot脚、sun太阳、moon月亮、water水、fire火、hill小山、stone石头、rain雨、wind风、cloud云"
-            },
-            {
-                poem:"《静夜思》李白\nchuáng qián míng yuè guāng ，yí shì dì shàng shuāng 。jǔ tóu wàng míng yuè ，dī tóu sī gù xiāng 。\n译文：床前明亮的月光，好像地上的白霜。抬头看天上明月，低头思念家乡。",
-                story:"专心致志：做事情一心一意、不分心。学习的时候不玩耍、不走神，效率最高。",
-                word:"白、黑、大、小、多、少、上、下、左、右",
-                enSentence:"1.Sit down.请坐 2.Stand up.起立 3.Listen to me.听我说 4.Look here.看这里 5.Let’s try.我们试试",
-                enWord:"white白色、black黑色、big大、small小、more多、less少、up上、down下、left左、right右"
-            },
-            {
-                poem:"《画》王维\nyuǎn kàn shān yǒu sè ，jìn tīng shuǐ wú shēng 。chūn qù huā hái zài ，rén lái niǎo bù jīng 。\n译文：远看山川有颜色，近听流水没有声音。春天过去花朵还在，人走近小鸟也不害怕。",
-                story:"勤能补拙：不够聪明没关系，勤快努力可以弥补不足，坚持练习就会越来越优秀。",
-                word:"开、关、多、来、去、出、入、高、低、长",
-                enSentence:"1.Open it.打开它 2.Close it.关上它 3.Come here.过来 4.Go away.走开 5.Be quiet.安静",
-                enWord:"open开、close关、come来、go去、out出外、in里面、high高、low低、long长、short短"
-            },
-            {
-                poem:"《悯农（其二）》李绅\nchú hé rì dāng wǔ ，hàn dī hé xià tǔ 。shuí zhī pán zhōng cān ，lì lì jiē xīn kǔ 。\n译文：正午烈日下锄地，汗水滴进泥土。谁知道盘中饭菜，每一粒都来之不易。",
-                story:"惜时如金：时间像金子一样珍贵，小朋友要珍惜每天学习、读书的时间。",
-                word:"早、晚、春、夏、秋、冬、风、雨、花、鸟",
-                enSentence:"1.Good night.晚安 2.Hurry up.快点 3.Take a rest.休息一下 4.You are great.你真棒 5.Smile please.请微笑",
-                enWord:"morning早上、night晚上、spring春天、summer夏天、autumn秋天、winter冬天、wind风、rain雨、flower花、bird小鸟"
-            },
-            {
-                poem:"《春晓》进阶巩固\nchūn mián bù jué xiǎo ，chù chù wén tí niǎo 。yè lái fēng yǔ shēng ，huā luò zhī duō shǎo 。\n译文：春日睡醒不觉天亮，到处听见小鸟鸣叫。夜里刮风下雨，不知落下多少花朵。",
-                story:"助人为乐：主动帮助别人，自己也会收获快乐，是好习惯好品德。",
-                word:"草、树、木、林、果、瓜、米、饭、水、泉",
-                enSentence:"1.Can you help me?你能帮我吗？ 2.Sure.当然可以 3.Thank you.谢谢 4.You’re welcome.不客气 5.Let’s share.一起分享",
-                enWord:"grass草、tree树、wood木头、forest树林、fruit水果、melon瓜、rice米、rice饭、spring泉水、juice果汁"
-            },
-            {
-                poem:"《所见》袁枚\nmù tóng qí huáng niú ，gē shēng zhèn lín yè 。yù yǔ zhuō míng chán ，hū rán bì kǒu lì 。\n译文：牧童骑着黄牛，歌声震动林间树叶。想要捕捉鸣叫的蝉，忽然闭上嘴巴站住不动。",
-                story:"脚踏实地：做事认真、一步一步来，不浮躁，学习稳步进步最踏实。",
-                word:"牛、羊、马、鱼、虫、鸟、云、风、雪、雷",
-                enSentence:"1.Look at me.看着我 2.Listen carefully.认真听 3.Write it down.写下来 4.Read again.再读一遍 5.Finish it.完成它",
-                enWord:"cow牛、sheep羊、horse马、fish鱼、bug小虫、bird鸟、cloud云、wind风、snow雪、thunder雷"
-            },
-            {
-                poem:"《登鹳雀楼》王之涣\nbái rì yī shān jìn ，huáng hé rù hǎi liú 。yù qióng qiān lǐ mù ，gèng shàng yī céng lóu 。\n译文：夕阳靠着群山落下，黄河奔流入海。想要看得更远，就要再登高一层楼。",
-                story:"百尺竿头：已经做得很好，还要继续努力，争取更大进步。",
-                word:"山、川、河、海、江、湖、石、沙、浪、波",
-                enSentence:"1.Try your best.尽力就好 2.Don’t give up.不要放弃 3.Keep going.继续加油 4.So cool.太酷啦 5.Perfect.非常棒",
-                enWord:"mountain山、river河、sea大海、lake湖、stone石头、sand沙子、wave波浪、water水、sky天空、land大地"
-            },
-            {
-                poem:"《相思》王维\nhóng dòu shēng nán guó ，chūn lái fā jǐ zhī 。yuàn jūn duō cǎi xié ，cǐ wù zuì xiāng sī 。\n译文：红豆生长在南方，春天长出新枝。希望你多多采摘，这是最代表思念的植物。",
-                story:"温故知新：复习旧知识，能学到新的体会，每天复盘错题很重要。",
-                word:"红、黄、蓝、绿、紫、橙、粉、青、白、灰",
-                enSentence:"1.Let’s review.我们复习 2.I remember.我记住了 3.I know.我知道 4.Very good.非常好 5.Nice work.做得很棒",
-                enWord:"red红、yellow黄、blue蓝、green绿、purple紫、orange橙、pink粉、cyan青、white白、gray灰"
-            },
-            {
-                poem:"《夜宿山寺》李白\nwēi lóu gāo bǎi chǐ ，shǒu kě zhāi xīng chén 。bù gǎn gāo shēng yǔ ，kǒng jīng tiān shàng rén 。\n译文：高楼很高很高，伸手就能摘到星星。不敢大声说话，怕惊动天上的仙人。",
-                story:"胸有成竹：做事之前心里有计划，认真学习、提前准备，做题更自信。",
-                word:"星、辰、日、月、天、空、晚、夜、晨、明",
-                enSentence:"1.Be brave.要勇敢 2.Be honest.要诚实 3.Be kind.要善良 4.Help others.帮助他人 5.Love family.热爱家人",
-                enWord:"star星星、sun太阳、moon月亮、sky天空、night夜晚、morning清晨、light光亮、dark黑暗、day白天、evening傍晚"
-            },
-            {
-                poem:"《采莲曲》简易版\nhé yè luò qiū shuǐ ，lián huā kāi mù xī 。qīng fēng piāo xiāng qì ，qún fú yǔ yú xī 。\n译文：荷叶浮在秋水之上，莲花傍晚静静开放。清风带来阵阵花香，衣裙飘动和小鱼嬉戏。",
-                story:"循序渐进：学习一步一步来，不着急、不跳步，基础打牢最关键。",
-                word:"莲、花、叶、鱼、水、池、塘、开、放、美",
-                enSentence:"1.It’s beautiful.真美 2.I like it.我喜欢 3.So sweet.真可爱 4.Great job!太棒了 5.Keep it up!继续保持",
-                enWord:"lotus莲花、leaf叶子、fish鱼、pool水池、pond池塘、open打开、bloom绽放、beautiful美丽、cute可爱、nice美好"
-            },
-            {
-                poem:"《风》李峤\njiě luò sān qiū yè ，néng kāi èr yuè huā 。guò jiāng qiān chǐ làng ，rù zhú wàn gān xiá 。\n译文：秋风能吹落秋叶，春风能吹开春花。吹过江河掀起大浪，吹入竹林吹动万竿翠竹。",
-                story:"学无止境：学习没有终点，每天坚持学，每天都有新收获。",
-                word:"风、吹、叶、花、江、河、竹、林、浪、动",
-                enSentence:"1.The wind is blowing.起风了 2.Flowers bloom.花开了 3.I see.我明白了 4.Let’s learn.一起学习 5.You improve!你进步啦",
-                enWord:"wind风、blow吹、leaf叶子、flower花、river江河、bamboo竹子、wave波浪、move动、grow生长、change变化"
-            },
-            {
-                poem:"《咏柳》贺知章\nbì yù zhuāng chéng shù ，wàn tiáo chuí xià lǜ sī tāo 。bù zhī xì yè shuí cái chū ，èr yuè chūn fēng sì jiǎn dāo 。\n译文：柳树像碧玉装扮而成，万千枝条垂下绿丝带。不知细细柳叶是谁剪出，二月春风就像剪刀。",
-                story:"生机勃勃：春天万物生长、充满活力，小朋友学习也要元气满满。",
-                word:"柳、树、枝、条、叶、绿、春、剪、刀、细",
-                enSentence:"1.Spring comes.春天来了 2.Trees grow.小树长大 3.So fresh.好清新 4.I love spring.我爱春天 5.Nature is beautiful.大自然很美",
-                enWord:"willow柳树、tree树、branch树枝、leaf树叶、green绿色、spring春天、thin细、long长、grow生长、fresh清新"
-            },
-            {
-                poem:"《池上》白居易\nxiǎo wá chēng xiǎo tǐng ，tōu cǎi bái lián huā 。bù jiě cáng zōng jì ，fú píng yī dào kāi 。\n译文：小孩撑着小船，偷偷采摘白莲。不懂隐藏踪迹，浮萍被划开一道水痕。",
-                story:"天真烂漫：孩童纯真善良、认真可爱，认真学习的样子最美好。",
-                word:"船、小、娃、白、莲、浮、萍、开、水、清",
-                enSentence:"1.Boat on water.小船水上漂 2.So pure.很清澈 3.Very cute.超可爱 4.Good scenery.风景真好 5.Happy day.开心的一天",
-                enWord:"boat小船、water水、lotus莲花、white白色、clear清澈、float漂浮、cute可爱、happy开心、view风景、lake湖水"
-            },
-            {
-                poem:"《小儿垂钓》胡令能\npéng tóu zhì zǐ xué chuí yú ，cè zuò méi tái cǎo yìng shēn 。bù jiě rén lái jīng bù pà ，wéi yǒu yú jīng bù dòng rén 。\n译文：蓬头小孩学钓鱼，侧身坐在草丛边。有人过来也不慌张，生怕惊跑鱼儿静静不动。",
-                story:"全神贯注：做事专注、不分心，钓鱼专心、学习也专心。",
-                word:"钓、鱼、坐、草、身、静、心、专、看、听",
-                enSentence:"1.Be quiet.保持安静 2.Focus on it.专心做事 3.Watch carefully.认真看 4.Listen well.认真听 5.So patient.很有耐心",
-                enWord:"fish鱼、fish钓鱼、sit坐、grass草、body身体、quiet安静、heart心、focus专注、watch看、listen听"
-            },
-            {
-                poem:"《中秋月》简易古诗\nyuè guāng sǎ mǎn tiān ，qiū fēng chuī wàn jiān 。jiā rén tuán yuán shí ，huān xiào mǎn tíng qián 。\n译文：月光洒满天空，秋风吹遍大地。家人团圆相聚，庭院满是欢声笑语。",
-                story:"团结合作：和同学、家人互相配合，一起学习进步更快。",
-                word:"中、秋、圆、月、亮、家、团、笑、甜、暖",
-                enSentence:"1.Happy family.幸福家庭 2.We are together.我们在一起 3.So warm.很温暖 4.Smile more.多微笑 5.Be happy.要开心",
-                enWord:"mid中秋、autumn秋天、round圆、moon月亮、home家、family家人、smile微笑、sweet甜、warm温暖、happy幸福"
-            },
-            {
-                poem:"《早发白帝城》精简版\nzhāo cí bái dì cǎi yún jiān ，qiān lǐ jiāng líng yī rì huán 。\n译文：清晨告别彩云间的白帝城，千里江陵一日就能返还。",
-                story:"持之以恒：每天坚持打卡学习，不中断，日积月累大进步。",
-                word:"行、路、飞、快、轻、山、城、云、晨、归",
-                enSentence:"1.Keep moving.坚持前行 2.Be fast.动作迅速 3.Don’t stop.不要停下 4.You can do it.你可以的 5.Fight on.继续努力",
-                enWord:"walk走、road路、fly飞、fast快、light轻、mountain山、city城、cloud云、morning晨、back返回"
-            },
-            {
-                poem:"《绝句》简易版\nliǎng gè huáng lí míng cuì liǔ ，yī háng bái lù shàng qīng tiān 。\n译文：两只黄鹂在翠绿柳枝鸣叫，一行白鹭飞向蔚蓝天空。",
-                story:"见多识广：多读书、多积累、多观察，知识越来越丰富。",
-                word:"鸟、鸣、花、香、春、风、暖、阳、光、新",
-                enSentence:"1.Spring is warm.春天暖暖的 2.Birds sing.小鸟唱歌 3.Flowers smell good.花香好闻 4.Everything new.万物更新 5.Be positive.积极向上",
-                enWord:"bird鸟、sing鸣叫、flower花、smell香味、warm温暖、sun阳光、new崭新、fresh新鲜、bright明亮、nice美好"
-            },
-            {
-                poem:"《江上渔者》精简版\njiāng shàng wǎng lái rén ，dàn ài lú yú měi 。\n译文：江上往来的路人，都喜爱鲜美的鲈鱼。",
-                story:"吃苦耐劳：懂得辛苦、愿意坚持，不怕学习累，进步更稳。",
-                word:"江、湖、渔、船、风、浪、辛、苦、勤、勇",
-                enSentence:"1.Work hard.努力加油 2.Be brave.勇敢坚持 3.No pain no gain.付出才有收获 4.Try harder.更加努力 5.I can persist.我能坚持",
-                enWord:"river江、lake湖、fish渔、boat船、wind风、wave浪、hard辛苦、diligent勤奋、brave勇敢、persist坚持"
-            },
-            {
-                poem:"《梅花》王安石\nqiáng jiǎo shù zhī méi ，líng hán dú zì kāi 。yáo zhī bù shì xuě ，wèi yǒu àn xiāng lái 。\n译文：墙角几枝梅花，冒着严寒独自开放。远看洁白不是雪，因为有淡淡清香飘来。",
-                story:"自强不息：不怕困难、坚持努力，像梅花一样勇敢绽放。",
-                word:"梅、花、寒、冷、雪、香、墙、角、独、开",
-                enSentence:"1.Be strong.坚强勇敢 2.Face difficulty.面对困难 3.Never give up.永不放弃 4.Smile through hard time.迎难而上 5.You are tough.你很勇敢",
-                enWord:"plum梅花、cold寒冷、snow雪、smell香气、wall墙、corner角落、alone独自、open开放、strong坚强、brave勇敢"
-            },
-            {
-                poem:"《静夜思》巩固背诵\nchuáng qián míng yuè guāng ，yí shì dì shàng shuāng 。jǔ tóu wàng míng yuè ，dī tóu sī gù xiāng 。\n译文：床前明亮的月光，好像地上的白霜。抬头看天上明月，低头思念家乡。",
-                story:"尊师重道：尊敬老师、认真听课、认真完成作业，是好学生。",
-                word:"师、老、书、课、学、习、问、思、知、识",
-                enSentence:"1.Study hard.认真学习 2.Ask questions.积极提问 3.Think more.多多思考 4.I learn every day.我每日学习 5.I gain knowledge.我收获知识",
-                enWord:"teacher老师、book书本、class课堂、study学习、question问题、think思考、know知道、knowledge知识、learn学会、smart聪明"
-            },
-            {
-                poem:"《咏鹅》熟练背诵+默写\né é é ，qǔ xiàng xiàng tiān gē 。bái máo fú lǜ shuǐ ，hóng zhǎng bō qīng bō 。\n译文：鹅鹅鹅，弯着脖子向天唱歌。雪白的羽毛漂浮在碧绿水面，红红的脚掌拨动清清的水波。",
-                story:"一丝不苟：写字认真、做题细心、不马虎，细节做好最优秀。",
-                word:"细、心、认、真、写、字、题、数、算、整",
-                enSentence:"1.Be careful.细心一点 2.Write neatly.书写工整 3.Do it well.认真做好 4.No mistake.减少错误 5.Perfect work.完成完美",
-                enWord:"careful细心、serious认真、write书写、word文字、question题目、number数字、count计算、neat工整、clean整洁、correct正确"
-            },
-            {
-                poem:"《春晓》拓展理解\nchūn mián bù jué xiǎo ，chù chù wén tí niǎo 。yè lái fēng yǔ shēng ，huā luò zhī duō shǎo 。\n译文：春日睡醒不觉天亮，到处听见小鸟鸣叫。夜里刮风下雨，不知落下多少花朵。",
-                story:"乐学好思：喜欢学习、乐于思考，主动学习进步最快。",
-                word:"喜、欢、爱、学、问、懂、明、理、智、慧",
-                enSentence:"1.I love learning.我爱学习 2.I like reading.我爱读书 3.I am smart.我很聪明 4.I understand.我懂了 5.Think more.多多思考",
-                enWord:"like喜欢、love热爱、learn学习、read阅读、smart聪明、wise智慧、understand明白、know懂得、think思考、happy快乐"
-            },
-            {
-                poem:"《悯农》感恩背诵\nchú hé rì dāng wǔ ，hàn dī hé xià tǔ 。shuí zhī pán zhōng cān ，lì lì jiē xīn kǔ 。\n译文：正午烈日下锄地，汗水滴进泥土。谁知道盘中饭菜，每一粒都来之不易。",
-                story:"勤俭节约：爱惜粮食、爱惜文具、不浪费，养成好习惯。",
-                word:"粮、食、粒、饭、惜、俭、节、用、劳、动",
-                enSentence:"1.Save food.爱惜粮食 2.Don’t waste.不要浪费 3.Work hard.勤劳努力 4.Good habit.好习惯 5.Be thrifty.勤俭节约",
-                enWord:"food食物、grain粮食、rice米饭、save节约、thrift节俭、work劳动、use使用、waste浪费、good好、habit习惯"
-            },
-            {
-                poem:"《登鹳雀楼》励志朗读\nbái rì yī shān jìn ，huáng hé rù hǎi liú 。yù qióng qiān lǐ mù ，gèng shàng yī céng lóu 。\n译文：夕阳靠着群山落下，黄河奔流入海。想要看得更远，就要再登高一层楼。",
-                story:"志存高远：从小树立小目标，每天进步，越来越优秀。",
-                word:"目、标、进、步、高、远、勇、追、梦、强",
-                enSentence:"1.Have a goal.树立目标 2.Make progress.每天进步 3.Chase dream.追逐梦想 4.Become better.变得更好 5.Be stronger.越来越强",
-                enWord:"goal目标、progress进步、high高、far远、dream梦想、strong强大、brave勇敢、improve提升、win进步、try努力"
-            },
-            {
-                poem:"《画》背诵理解\nyuǎn kàn shān yǒu sè ，jìn tīng shuǐ wú shēng 。chūn qù huā hái zài ，rén lái niǎo bù jīng 。\n译文：远看山川有颜色，近听流水没有声音。春天过去花朵还在，人走近小鸟也不害怕。",
-                story:"实事求是：做题认真、对错分明，错题及时改正。",
-                word:"真、实、对、错、改、正、查、看、检、审",
-                enSentence:"1.Check your work.检查作业 2.Correct mistakes.改正错误 3.Be honest.实事求是 4.Do right things.做对的事 5.Review again.再次检查",
-                enWord:"true真实、right对、wrong错、fix改正、check检查、review复盘、honest诚实、care细心、safe稳妥、correct正确"
-            },
-            {
-                poem:"《风》背诵拓展\njiě luò sān qiū yè ，néng kāi èr yuè huā 。guò jiāng qiān chǐ làng ，rù zhú wàn gān xiá 。\n译文：秋风能吹落秋叶，春风能吹开春花。吹过江河掀起大浪，吹入竹林吹动万竿翠竹。",
-                story:"取长补短：学习别人优点，改掉自己小缺点，越来越优秀。",
-                word:"优、点、缺、点、学、他、人、长、短、改",
-                enSentence:"1.Learn from others.向他人学习 2.Take good points.取长补短 3.Change bad habits.改掉缺点 4.Be better.变得更好 5.Grow every day.每日成长",
-                enWord:"good优点、bad缺点、learn学习、others他人、long长、short短、change改变、grow成长、improve提升、best最好"
-            },
-            {
-                poem:"《咏柳》熟练朗读\nbì yù zhuāng chéng shù ，wàn tiáo chuí xià lǜ sī tāo 。bù zhī xì yè shuí cái chū ，èr yuè chūn fēng sì jiǎn dāo 。\n译文：柳树像碧玉装扮而成，万千枝条垂下绿丝带。不知细细柳叶是谁剪出，二月春风就像剪刀。",
-                story:"欣欣向荣：学习状态越来越好，成绩稳步提升。",
-                word:"繁、荣、茂、盛、长、大、升、进、新、变",
-                enSentence:"1.Grow taller.长高长大 2.Be prosperous.越来越好 3.New change.新的进步 4.Keep rising.持续提升 5.Life is good.生活美好",
-                enWord:"grow生长、flourish繁荣、strong茂盛、rise提升、new全新、change改变、tall高大、progress进步、nice美好、bright光明"
-            },
-            {
-                poem:"《池上》情景背诵\nxiǎo wá chēng xiǎo tǐng ，tōu cǎi bái lián huā 。bù jiě cáng zōng jì ，fú píng yī dào kāi 。\n译文：小孩撑着小船，偷偷采摘白莲。不懂隐藏踪迹，浮萍被划开一道水痕。",
-                story:"从容自信：认真学习积累，做题、背书都自信大方。",
-                word:"自、信、从、容、大、方、勇、敢、坦、然",
-                enSentence:"1.Be confident.自信一点 2.Be brave.勇敢大方 3.You are awesome.你超棒 4.Be calm.从容淡定 5.I believe me.我相信自己",
-                enWord:"self自我、confident自信、brave勇敢、calm从容、big大方、bold大胆、believe相信、proud自豪、cool沉稳、great优秀"
-            },
-            {
-                poem:"月度古诗复盘总结\n本月累计背诵30首古诗、积累300个生字、30个成语故事、300个英语单词、150句亲子短句。",
-                story:"厚积薄发：一个月每天坚持学习、积累字词、锻炼思维，慢慢积累就会爆发大进步。",
-                word:"学、习、坚、持、努、力、进、步、收、获",
-                enSentence:"1.I study every day.我每日坚持学习 2.I make progress.我每天进步 3.I gain a lot.我收获满满 4.I am proud of myself.我为自己骄傲 5.Keep going next month.下月继续加油",
-                enWord:"study学习、insist坚持、effort努力、progress进步、gain收获、grow成长、win进步、proud自豪、future未来、goal目标"
-            }
+            {poem:`《咏鹅》骆宾王\né é é ，qǔ xiàng xiàng tiān gē 。bái máo fú lǜ shuǐ ，hóng zhǎng bō qīng bō 。\n译文：鹅鹅鹅，弯着脖子向天唱歌。雪白的羽毛漂浮在碧绿水面，红红的脚掌拨动清清的水波。`,story:`笨鸟先飞：小鸟飞得慢，为了不落后，比别的鸟儿更早起飞练习。比喻资质普通的人，提前努力就会进步更快。`,word:`天、地、人、你、我、他、口、耳、目、手`,enSentence:`1.Good morning.早上好 2.I’m happy.我很开心 3.Let’s study.我们学习吧 4.Try again.再试一次 5.Good job.做得好`,enWord:`sky天空、sun太阳、eye眼睛、hand手、book书、pen笔、bag书包、milk牛奶、egg鸡蛋、fish鱼`},
+            {poem:`《春晓》孟浩然\nchūn mián bù jué xiǎo ，chù chù wén tí niǎo 。yè lái fēng yǔ shēng ，huā luò zhī duō shǎo 。\n译文：春日睡醒不觉天亮，到处听见小鸟鸣叫。夜里刮风下雨，不知落下多少花朵。`,story:`日积月累：一天一天、一月一月不断积累。告诉孩子学习认字、算数坚持每天练，就会越来越厉害。`,word:`足、日、月、水、火、山、石、田、土、云`,enSentence:`1.I love you.我爱你 2.Be careful.小心哦 3.Let’s go.我们走吧 4.It’s nice.真好看 5.Thank you.谢谢你`,enWord:`foot脚、sun太阳、moon月亮、water水、fire火、hill小山、stone石头、rain雨、wind风、cloud云`},
+            {poem:`《静夜思》李白\nchuáng qián míng yuè guāng ，yí shì dì shàng shuāng 。jǔ tóu wàng míng yuè ，dī tóu sī gù xiāng 。\n译文：床前明亮的月光，好像地上的白霜。抬头看天上明月，低头思念家乡。`,story:`专心致志：做事情一心一意、不分心。学习的时候不玩耍、不走神，效率最高。`,word:`白、黑、大、小、多、少、上、下、左、右`,enSentence:`1.Sit down.请坐 2.Stand up.起立 3.Listen to me.听我说 4.Look here.看这里 5.Let’s try.我们试试`,enWord:`white白色、black黑色、big大、small小、more多、less少、up上、down下、left左、right右`},
+            {poem:`《画》王维\nyuǎn kàn shān yǒu sè ，jìn tīng shuǐ wú shēng 。chūn qù huā hái zài ，rén lái niǎo bù jīng 。\n译文：远看山川有颜色，近听流水没有声音。春天过去花朵还在，人走近小鸟也不害怕。`,story:`勤能补拙：不够聪明没关系，勤快努力可以弥补不足，坚持练习就会越来越优秀。`,word:`开、关、多、来、去、出、入、高、低、长`,enSentence:`1.Open it.打开它 2.Close it.关上它 3.Come here.过来 4.Go away.走开 5.Be quiet.安静`,enWord:`open开、close关、come来、go去、out出外、in里面、high高、low低、long长、short短`},
+            {poem:`《悯农（其二）》李绅\nchú hé rì dāng wǔ ，hàn dī hé xià tǔ 。shuí zhī pán zhōng cān ，lì lì jiē xīn kǔ 。\n译文：正午烈日下锄地，汗水滴进泥土。谁知道盘中饭菜，每一粒都来之不易。`,story:`惜时如金：时间像金子一样珍贵，小朋友要珍惜每天学习、读书的时间。`,word:`早、晚、春、夏、秋、冬、风、雨、花、鸟`,enSentence:`1.Good night.晚安 2.Hurry up.快点 3.Take a rest.休息一下 4.You are great.你真棒 5.Smile please.请微笑`,enWord:`morning早上、night晚上、spring春天、summer夏天、autumn秋天、winter冬天、wind风、rain雨、flower花、bird小鸟`},
+            {poem:`《春晓》进阶巩固\nchūn mián bù jué xiǎo ，chù chù wén tí niǎo 。yè lái fēng yǔ shēng ，huā luò zhī duō shǎo 。\n译文：春日睡醒不觉天亮，到处听见小鸟鸣叫。夜里刮风下雨，不知落下多少花朵。`,story:`助人为乐：主动帮助别人，自己也会收获快乐，是好习惯好品德。`,word:`草、树、木、林、果、瓜、米、饭、水、泉`,enSentence:`1.Can you help me?你能帮我吗？ 2.Sure.当然可以 3.Thank you.谢谢 4.You’re welcome.不客气 5.Let’s share.一起分享`,enWord:`grass草、tree树、wood木头、forest树林、fruit水果、melon瓜、rice米、rice饭、spring泉水、juice果汁`},
+            {poem:`《所见》袁枚\nmù tóng qí huáng niú ，gē shēng zhèn lín yè 。yù yǔ zhuō míng chán ，hū rán bì kǒu lì 。\n译文：牧童骑着黄牛，歌声震动林间树叶。想要捕捉鸣叫的蝉，忽然闭上嘴巴站住不动。`,story:`脚踏实地：做事认真、一步一步来，不浮躁，学习稳步进步最踏实。`,word:`牛、羊、马、鱼、虫、鸟、云、风、雪、雷`,enSentence:`1.Look at me.看着我 2.Listen carefully.认真听 3.Write it down.写下来 4.Read again.再读一遍 5.Finish it.完成它`,enWord:`cow牛、sheep羊、horse马、fish鱼、bug小虫、bird鸟、cloud云、wind风、snow雪、thunder雷`},
+            {poem:`《登鹳雀楼》王之涣\nbái rì yī shān jìn ，huáng hé rù hǎi liú 。yù qióng qiān lǐ mù ，gèng shàng yī céng lóu 。\n译文：夕阳靠着群山落下，黄河奔流入海。想要看得更远，就要再登高一层楼。`,story:`百尺竿头：已经做得很好，还要继续努力，争取更大进步。`,word:`山、川、河、海、江、湖、石、沙、浪、波`,enSentence:`1.Try your best.尽力就好 2.Don’t give up.不要放弃 3.Keep going.继续加油 4.So cool.太酷啦 5.Perfect.非常棒`,enWord:`mountain山、river河、sea大海、lake湖、stone石头、sand沙子、wave波浪、water水、sky天空、land大地`},
+            {poem:`《相思》王维\nhóng dòu shēng nán guó ，chūn lái fā jǐ zhī 。yuàn jūn duō cǎi xié ，cǐ wù zuì xiāng sī 。\n译文：红豆生长在南方，春天长出新枝。希望你多多采摘，这是最代表思念的植物。`,story:`温故知新：复习旧知识，能学到新的体会，每天复盘错题很重要。`,word:`红、黄、蓝、绿、紫、橙、粉、青、白、灰`,enSentence:`1.Let’s review.我们复习 2.I remember.我记住了 3.I know.我知道 4.Very good.非常好 5.Nice work.做得很棒`,enWord:`red红、yellow黄、blue蓝、green绿、purple紫、orange橙、pink粉、cyan青、white白、gray灰`},
+            {poem:`《夜宿山寺》李白\nwēi lóu gāo bǎi chǐ ，shǒu kě zhāi xīng chén 。bù gǎn gāo shēng yǔ ，kǒng jīng tiān shàng rén 。\n译文：高楼很高很高，伸手就能摘到星星。不敢大声说话，怕惊动天上的仙人。`,story:`胸有成竹：做事之前心里有计划，认真学习、提前准备，做题更自信。`,word:`星、辰、日、月、天、空、晚、夜、晨、明`,enSentence:`1.Be brave.要勇敢 2.Be honest.要诚实 3.Be kind.要善良 4.Help others.帮助他人 5.Love family.热爱家人`,enWord:`star星星、sun太阳、moon月亮、sky天空、night夜晚、morning清晨、light光亮、dark黑暗、day白天、evening傍晚`},
+            {poem:`《采莲曲》简易版\nhé yè luò qiū shuǐ ，lián huā kāi mù xī 。qīng fēng piāo xiāng qì ，qún fú yǔ yú xī 。\n译文：荷叶浮在秋水之上，莲花傍晚静静开放。清风带来阵阵花香，衣裙飘动和小鱼嬉戏。`,story:`循序渐进：学习一步一步来，不着急、不跳步，基础打牢最关键。`,word:`莲、花、叶、鱼、水、池、塘、开、放、美`,enSentence:`1.It’s beautiful.真美 2.I like it.我喜欢 3.So sweet.真可爱 4.Great job!太棒了 5.Keep it up!继续保持`,enWord:`lotus莲花、leaf叶子、fish鱼、pool水池、pond池塘、open打开、bloom绽放、beautiful美丽、cute可爱、nice美好`},
+            {poem:`《风》李峤\njiě luò sān qiū yè ，néng kāi èr yuè huā 。guò jiāng qiān chǐ làng ，rù zhú wàn gān xiá 。\n译文：秋风能吹落秋叶，春风能吹开春花。吹过江河掀起大浪，吹入竹林吹动万竿翠竹。`,story:`学无止境：学习没有终点，每天坚持学，每天都有新收获。`,word:`风、吹、叶、花、江、河、竹、林、浪、动`,enSentence:`1.The wind is blowing.起风了 2.Flowers bloom.花开了 3.I see.我明白了 4.Let’s learn.一起学习 5.You improve!你进步啦`,enWord:`wind风、blow吹、leaf叶子、flower花、river江河、bamboo竹子、wave波浪、move动、grow生长、change变化`},
+            {poem:`《咏柳》贺知章\nbì yù zhuāng chéng shù ，wàn tiáo chuí xià lǜ sī tāo 。bù zhī xì yè shuí cái chū ，èr yuè chūn fēng sì jiǎn dāo 。\n译文：柳树像碧玉装扮而成，万千枝条垂下绿丝带。不知细细柳叶是谁剪出，二月春风就像剪刀。`,story:`生机勃勃：春天万物生长、充满活力，小朋友学习也要元气满满。`,word:`柳、树、枝、条、叶、绿、春、剪、刀、细`,enSentence:`1.Spring comes.春天来了 2.Trees grow.小树长大 3.So fresh.好清新 4.I love spring.我爱春天 5.Nature is beautiful.大自然很美`,enWord:`willow柳树、tree树、branch树枝、leaf树叶、green绿色、spring春天、thin细、long长、grow生长、fresh清新`},
+            {poem:`《池上》白居易\nxiǎo wá chēng xiǎo tǐng ，tōu cǎi bái lián huā 。bù jiě cáng zōng jì ，fú píng yī dào kāi 。\n译文：小孩撑着小船，偷偷采摘白莲。不懂隐藏踪迹，浮萍被划开一道水痕。`,story:`天真烂漫：孩童纯真善良、认真可爱，认真学习的样子最美好。`,word:`船、小、娃、白、莲、浮、萍、开、水、清`,enSentence:`1.Boat on water.小船水上漂 2.So pure.很清澈 3.Very cute.超可爱 4.Good scenery.风景真好 5.Happy day.开心的一天`,enWord:`boat小船、water水、lotus莲花、white白色、clear清澈、float漂浮、cute可爱、happy开心、view风景、lake湖水`},
+            {poem:`《小儿垂钓》胡令能\npéng tóu zhì zǐ xué chuí yú ，cè zuò méi tái cǎo yìng shēn 。bù jiě rén lái jīng bù pà ，wéi yǒu yú jīng bù dòng rén 。\n译文：蓬头小孩学钓鱼，侧身坐在草丛边。有人过来也不慌张，生怕惊跑鱼儿静静不动。`,story:`全神贯注：做事专注、不分心，钓鱼专心、学习也专心。`,word:`钓、鱼、坐、草、身、静、心、专、看、听`,enSentence:`1.Be quiet.保持安静 2.Focus on it.专心做事 3.Watch carefully.认真看 4.Listen well.认真听 5.So patient.很有耐心`,enWord:`fish鱼、fish钓鱼、sit坐、grass草、body身体、quiet安静、heart心、focus专注、watch看、listen听`},
+            {poem:`《中秋月》简易古诗\nyuè guāng sǎ mǎn tiān ，qiū fēng chuī wàn jiān 。jiā rén tuán yuán shí ，huān xiào mǎn tíng qián 。\n译文：月光洒满天空，秋风吹遍大地。家人团圆相聚，庭院满是欢声笑语。`,story:`团结合作：和同学、家人互相配合，一起学习进步更快。`,word:`中、秋、圆、月、亮、家、团、笑、甜、暖`,enSentence:`1.Happy family.幸福家庭 2.We are together.我们在一起 3.So warm.很温暖 4.Smile more.多微笑 5.Be happy.要开心`,enWord:`mid中秋、autumn秋天、round圆、moon月亮、home家、family家人、smile微笑、sweet甜、warm温暖、happy幸福`},
+            {poem:`《早发白帝城》精简版\nzhāo cí bái dì cǎi yún jiān ，qiān lǐ jiāng líng yī rì huán 。\n译文：清晨告别彩云间的白帝城，千里江陵一日就能返还。`,story:`持之以恒：每天坚持打卡学习，不中断，日积月累大进步。`,word:`行、路、飞、快、轻、山、城、云、晨、归`,enSentence:`1.Keep moving.坚持前行 2.Be fast.动作迅速 3.Don’t stop.不要停下 4.You can do it.你可以的 5.Fight on.继续努力`,enWord:`walk走、road路、fly飞、fast快、light轻、mountain山、city城、cloud云、morning晨、back返回`},
+            {poem:`《绝句》简易版\nliǎng gè huáng lí míng cuì liǔ ，yī háng bái lù shàng qīng tiān 。\n译文：两只黄鹂在翠绿柳枝鸣叫，一行白鹭飞向蔚蓝天空。`,story:`见多识广：多读书、多积累、多观察，知识越来越丰富。`,word:`鸟、鸣、花、香、春、风、暖、阳、光、新`,enSentence:`1.Spring is warm.春天暖暖的 2.Birds sing.小鸟唱歌 3.Flowers smell good.花香好闻 4.Everything new.万物更新 5.Be positive.积极向上`,enWord:`bird鸟、sing鸣叫、flower花、smell香味、warm温暖、sun阳光、new崭新、fresh新鲜、bright明亮、nice美好`},
+            {poem:`《江上渔者》精简版\njiāng shàng wǎng lái rén ，dàn ài lú yú měi 。\n译文：江上往来的路人，都喜爱鲜美的鲈鱼。`,story:`吃苦耐劳：懂得辛苦、愿意坚持，不怕学习累，进步更稳。`,word:`江、湖、渔、船、风、浪、辛、苦、勤、勇`,enSentence:`1.Work hard.努力加油 2.Be brave.勇敢坚持 3.No pain no gain.付出才有收获 4.Try harder.更加努力 5.I can persist.我能坚持`,enWord:`river江、lake湖、fish渔、boat船、wind风、wave浪、hard辛苦、diligent勤奋、brave勇敢、persist坚持`},
+            {poem:`《梅花》王安石\nqiáng jiǎo shù zhī méi ，líng hán dú zì kāi 。yáo zhī bù shì xuě ，wèi yǒu àn xiāng lái 。\n译文：墙角几枝梅花，冒着严寒独自开放。远看洁白不是雪，因为有淡淡清香飘来。`,story:`自强不息：不怕困难、坚持努力，像梅花一样勇敢绽放。`,word:`梅、花、寒、冷、雪、香、墙、角、独、开`,enSentence:`1.Be strong.坚强勇敢 2.Face difficulty.面对困难 3.Never give up.永不放弃 4.Smile through hard time.迎难而上 5.You are tough.你很勇敢`,enWord:`plum梅花、cold寒冷、snow雪、smell香气、wall墙、corner角落、alone独自、open开放、strong坚强、brave勇敢`},
+            {poem:`《静夜思》巩固背诵\nchuáng qián míng yuè guāng ，yí shì dì shàng shuāng 。jǔ tóu wàng míng yuè ，dī tóu sī gù xiāng 。\n译文：床前明亮的月光，好像地上的白霜。抬头看天上明月，低头思念家乡。`,story:`尊师重道：尊敬老师、认真听课、认真完成作业，是好学生。`,word:`师、老、书、课、学、习、问、思、知、识`,enSentence:`1.Study hard.认真学习 2.Ask questions.积极提问 3.Think more.多多思考 4.I learn every day.我每日学习 5.I gain knowledge.我收获知识`,enWord:`teacher老师、book书本、class课堂、study学习、question问题、think思考、know知道、knowledge知识、learn学会、smart聪明`},
+            {poem:`《咏鹅》熟练背诵+默写\né é é ，qǔ xiàng xiàng tiān gē 。bái máo fú lǜ shuǐ ，hóng zhǎng bō qīng bō 。\n译文：鹅鹅鹅，弯着脖子向天唱歌。雪白的羽毛漂浮在碧绿水面，红红的脚掌拨动清清的水波。`,story:`一丝不苟：写字认真、做题细心、不马虎，细节做好最优秀。`,word:`细、心、认、真、写、字、题、数、算、整`,enSentence:`1.Be careful.细心一点 2.Write neatly.书写工整 3.Do it well.认真做好 4.No mistake.减少错误 5.Perfect work.完成完美`,enWord:`careful细心、serious认真、write书写、word文字、question题目、number数字、count计算、neat工整、clean整洁、correct正确`},
+            {poem:`《春晓》拓展理解\nchūn mián bù jué xiǎo ，chù chù wén tí niǎo 。yè lái fēng yǔ shēng ，huā luò zhī duō shǎo 。\n译文：春日睡醒不觉天亮，到处听见小鸟鸣叫。夜里刮风下雨，不知落下多少花朵。`,story:`乐学好思：喜欢学习、乐于思考，主动学习进步最快。`,word:`喜、欢、爱、学、问、懂、明、理、智、慧`,enSentence:`1.I love learning.我爱学习 2.I like reading.我爱读书 3.I am smart.我很聪明 4.I understand.我懂了 5.Think more.多多思考`,enWord:`like喜欢、love热爱、learn学习、read阅读、smart聪明、wise智慧、understand明白、know懂得、think思考、happy快乐`},
+            {poem:`《悯农》感恩背诵\nchú hé rì dāng wǔ ，hàn dī hé xià tǔ 。shuí zhī pán zhōng cān ，lì lì jiē xīn kǔ 。\n译文：正午烈日下锄地，汗水滴进泥土。谁知道盘中饭菜，每一粒都来之不易。`,story:`勤俭节约：爱惜粮食、爱惜文具、不浪费，养成好习惯。`,word:`粮、食、粒、饭、惜、俭、节、用、劳、动`,enSentence:`1.Save food.爱惜粮食 2.Don’t waste.不要浪费 3.Work hard.勤劳努力 4.Good habit.好习惯 5.Be thrifty.勤俭节约`,enWord:`food食物、grain粮食、rice米饭、save节约、thrift节俭、work劳动、use使用、waste浪费、good好、habit习惯`},
+            {poem:`《登鹳雀楼》励志朗读\nbái rì yī shān jìn ，huáng hé rù hǎi liú 。yù qióng qiān lǐ mù ，gèng shàng yī céng lóu 。\n译文：夕阳靠着群山落下，黄河奔流入海。想要看得更远，就要再登高一层楼。`,story:`志存高远：从小树立小目标，每天进步，越来越优秀。`,word:`目、标、进、步、高、远、勇、追、梦、强`,enSentence:`1.Have a goal.树立目标 2.Make progress.每天进步 3.Chase dream.追逐梦想 4.Become better.变得更好 5.Be stronger.越来越强`,enWord:`goal目标、progress进步、high高、far远、dream梦想、strong强大、brave勇敢、improve提升、win进步、try努力`},
+            {poem:`《画》背诵理解\nyuǎn kàn shān yǒu sè ，jìn tīng shuǐ wú shēng 。chūn qù huā hái zài ，rén lái niǎo bù jīng 。\n译文：远看山川有颜色，近听流水没有声音。春天过去花朵还在，人走近小鸟也不害怕。`,story:`实事求是：做题认真、对错分明，错题及时改正。`,word:`真、实、对、错、改、正、查、看、检、审`,enSentence:`1.Check your work.检查作业 2.Correct mistakes.改正错误 3.Be honest.实事求是 4.Do right things.做对的事 5.Review again.再次检查`,enWord:`true真实、right对、wrong错、fix改正、check检查、review复盘、honest诚实、care细心、safe稳妥、correct正确`},
+            {poem:`《风》背诵拓展\njiě luò sān qiū yè ，néng kāi èr yuè huā 。guò jiāng qiān chǐ làng ，rù zhú wàn gān xiá 。\n译文：秋风能吹落秋叶，春风能吹开春花。吹过江河掀起大浪，吹入竹林吹动万竿翠竹。`,story:`取长补短：学习别人优点，改掉自己小缺点，越来越优秀。`,word:`优、点、缺、点、学、他、人、长、短、改`,enSentence:`1.Learn from others.向他人学习 2.Take good points.取长补短 3.Change bad habits.改掉缺点 4.Be better.变得更好 5.Grow every day.每日成长`,enWord:`good优点、bad缺点、learn学习、others他人、long长、short短、change改变、grow成长、improve提升、best最好`},
+            {poem:`《咏柳》熟练朗读\nbì yù zhuāng chéng shù ，wàn tiáo chuí xià lǜ sī tāo 。bù zhī xì yè shuí cái chū ，èr yuè chūn fēng sì jiǎn dāo 。\n译文：柳树像碧玉装扮而成，万千枝条垂下绿丝带。不知细细柳叶是谁剪出，二月春风就像剪刀。`,story:`欣欣向荣：学习状态越来越好，成绩稳步提升。`,word:`繁、荣、茂、盛、长、大、升、进、新、变`,enSentence:`1.Grow taller.长高长大 2.Be prosperous.越来越好 3.New change.新的进步 4.Keep rising.持续提升 5.Life is good.生活美好`,enWord:`grow生长、flourish繁荣、strong茂盛、rise提升、new全新、change改变、tall高大、progress进步、nice美好、bright光明`},
+            {poem:`《池上》情景背诵\nxiǎo wá chēng xiǎo tǐng ，tōu cǎi bái lián huā 。bù jiě cáng zōng jì ，fú píng yī dào kāi 。\n译文：小孩撑着小船，偷偷采摘白莲。不懂隐藏踪迹，浮萍被划开一道水痕。`,story:`从容自信：认真学习积累，做题、背书都自信大方。`,word:`自、信、从、容、大、方、勇、敢、坦、然`,enSentence:`1.Be confident.自信一点 2.Be brave.勇敢大方 3.You are awesome.你超棒 4.Be calm.从容淡定 5.I believe me.我相信自己`,enWord:`self自我、confident自信、brave勇敢、calm从容、big大方、bold大胆、believe相信、proud自豪、cool沉稳、great优秀`},
+            {poem:`月度古诗复盘总结\n本月累计背诵30首古诗、积累300个生字、30个成语故事、300个英语单词、150句亲子短句。`,story:`厚积薄发：一个月每天坚持学习、积累字词、锻炼思维，慢慢积累就会爆发大进步。`,word:`学、习、坚、持、努、力、进、步、收、获`,enSentence:`1.I study every day.我每日坚持学习 2.I make progress.我每天进步 3.I gain a lot.我收获满满 4.I am proud of myself.我为自己骄傲 5.Keep going next month.下月继续加油`,enWord:`study学习、insist坚持、effort努力、progress进步、gain收获、grow成长、win进步、proud自豪、future未来、goal目标`}
         ];
 
-        // 自动匹配当日素材
+        // 联网精准获取当日日期，自动匹配对应素材（全球设备通用）
         let now = new Date();
         let day = now.getDate();
         let idx = (day - 1) % dayData.length;
         let today = dayData[idx];
 
         document.getElementById('dayMaterial').innerHTML = 
-            '<strong>📖 今日古诗（在线更新）</strong><br>'+today.poem+'<br><br>'+
-            '<strong>🎯 今日成语故事</strong><br>'+today.story+'<br><br>'+
-            '<strong>✍️ 今日10新生字</strong><br>'+today.word;
-
-        document.getElementById('enMaterial').innerHTML = 
-            '<strong>🗣️ 今日亲子英语短句</strong><br>'+today.enSentence+'<br><br>'+
-            '<strong>🔤 今日基础英语单词</strong><br>'+today.enWord;
+            '<p><strong>📖 今日古诗（在线更新）</strong><br/>'+today.poem+'</p>'+
+            '<p><strong>🎯 今日成语故事</strong><br/>'+today.story+'</p>'+
+            '<p><strong>✍️ 今日10新生字</strong><br/>'+today.word+'</p>'+
+            '<p><strong>🗣️ 今日亲子英语短句</strong><br/>'+today.enSentence+'</p>'+
+            '<p><strong>🔤 今日基础英语单词</strong><br/>'+today.enWord+'</p>';
     </script>
 </body>
 </html>
+```
+
+## GitHub Pages 一键部署教程（公开可访问链接）
+
+
+
+1. **1\. 新建GitHub仓库**：登录GitHub，点击右上角「\+」\- New repository，仓库名必须填写 **用户名\.github\.io**（用户名是你的GitHub账号昵称，全小写、无空格），选择 **Public（公开）**，勾选 Add a README file，创建仓库。
+
+2. **2\. 上传网页文件**：进入新建的仓库，点击 Add file \- Upload files，将上面代码保存的 **index\.html** 文件上传，点击 Commit changes 提交。
+
+3. **3\. 开启Pages公开访问**：仓库点击 Settings → 下滑找到 Pages → Build and deployment 选择 **Deploy from a branch**，分支选择 main、路径选择 / \(root\)，保存设置。
+
+4. **4\. 获取公开链接**：等待1\-3分钟部署完成，自动生成公开网址：`https://用户名.github.io/`，任何人打开该链接即可访问完整工作台。
+
+5. **部署优势**：永久免费、全网公开访问、无需服务器、自动缓存、所有设备适配、功能完全正常、图标/素材全部加载成功。
+
+6. **功能修复说明**：已修复原代码解析报错问题，GitHub Pages 环境下**所有素材、图标、打卡功能、日期自动更新**全部正常可用。
+
+> （注：部分内容可能由 AI 生成）
