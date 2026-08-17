@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌟 小豆包学习工作台 🌟</title>
+<title>容容一年级学习平台</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -40,7 +40,7 @@ body {
 .logo {
   text-align: center;
   color: #fff;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: bold;
   margin-bottom: 8px;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
@@ -48,7 +48,7 @@ body {
 .logo-sub {
   text-align: center;
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   margin-bottom: 20px;
   opacity: 0.9;
 }
@@ -61,7 +61,7 @@ body {
   color: #fff;
   cursor: pointer;
   border-radius: 25px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   transition: all 0.3s;
   background: rgba(255,255,255,0.1);
@@ -75,7 +75,7 @@ body {
   color: var(--pink);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-.nav-icon { font-size: 22px; }
+.nav-icon { font-size: 21px; }
 .score-board {
   margin-top: 20px;
   background: rgba(255,255,255,0.2);
@@ -85,7 +85,7 @@ body {
   color: #fff;
 }
 .score-num {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: bold;
   color: var(--yellow);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -102,7 +102,7 @@ body {
 @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
 
 .page-title {
-  font-size: 28px;
+  font-size: 27px;
   color: var(--pink);
   margin-bottom: 20px;
   display: flex;
@@ -120,7 +120,7 @@ body {
 }
 .card:hover { transform: translateY(-3px); }
 .card-title {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: bold;
   margin-bottom: 12px;
   display: flex;
@@ -131,6 +131,9 @@ body {
 .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
 @media (max-width: 900px) {
+  .grid-2,.grid-3,.grid-4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
   .grid-2,.grid-3,.grid-4 { grid-template-columns: 1fr; }
 }
 /* 首页 */
@@ -143,8 +146,8 @@ body {
   margin-bottom: 24px;
   box-shadow: 0 8px 24px rgba(255,140,66,0.3);
 }
-.welcome-banner h1 { font-size: 36px; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-.welcome-banner p { font-size: 18px; opacity: 0.95; }
+.welcome-banner h1 { font-size: 34px; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+.welcome-banner p { font-size: 17px; opacity: 0.95; }
 .date-display {
   background: #fff;
   color: var(--orange);
@@ -153,7 +156,7 @@ body {
   border-radius: 20px;
   margin-top: 12px;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 15px;
 }
 .stat-card {
   background: #fff;
@@ -162,9 +165,9 @@ body {
   text-align: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
-.stat-icon { font-size: 40px; }
-.stat-num { font-size: 28px; font-weight: bold; color: var(--pink); margin: 8px 0; }
-.stat-label { color: #888; font-size: 14px; }
+.stat-icon { font-size: 38px; }
+.stat-num { font-size: 27px; font-weight: bold; color: var(--pink); margin: 8px 0; }
+.stat-label { color: #888; font-size: 13px; }
 /* 古诗 */
 .poem-box {
   background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
@@ -173,9 +176,9 @@ body {
   text-align: center;
   border: 2px dashed var(--orange);
 }
-.poem-title { font-size: 24px; color: var(--orange); font-weight: bold; margin-bottom: 8px; }
+.poem-title { font-size: 23px; color: var(--orange); font-weight: bold; margin-bottom: 8px; }
 .poem-author { color: #888; margin-bottom: 16px; }
-.poem-content { font-size: 20px; line-height: 2; color: #5D4037; }
+.poem-content { font-size: 19px; line-height: 2; color: #5D4037; }
 /* 字卡 */
 .char-card {
   background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%);
@@ -186,9 +189,9 @@ body {
   transition: transform 0.2s;
 }
 .char-card:hover { transform: scale(1.05); }
-.char-big { font-size: 48px; font-weight: bold; color: var(--blue); }
-.char-pinyin { font-size: 18px; color: #0277BD; margin-top: 4px; }
-.char-word { font-size: 14px; color: #555; margin-top: 4px; }
+.char-big { font-size: 46px; font-weight: bold; color: var(--blue); }
+.char-pinyin { font-size: 17px; color: #0277BD; margin-top: 4px; }
+.char-word { font-size: 13px; color: #555; margin-top: 4px; }
 /* 成语 */
 .idiom-box {
   background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
@@ -196,9 +199,9 @@ body {
   padding: 20px;
   border-left: 6px solid var(--purple);
 }
-.idiom-name { font-size: 24px; color: var(--purple); font-weight: bold; margin-bottom: 8px; }
+.idiom-name { font-size: 23px; color: var(--purple); font-weight: bold; margin-bottom: 8px; }
 .idiom-meaning { color: #4A148C; margin-bottom: 8px; }
-.idiom-story { color: #6A1B9A; line-height: 1.8; font-size: 15px; }
+.idiom-story { color: #6A1B9A; line-height: 1.8; font-size: 14px; }
 /* 按钮 */
 .btn {
   display: inline-block;
@@ -207,7 +210,7 @@ body {
   color: #fff;
   border: none;
   border-radius: 25px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s;
@@ -220,7 +223,7 @@ body {
 .btn-orange { background: var(--orange); }
 .btn-purple { background: var(--purple); }
 .btn-yellow { background: var(--yellow); color: var(--text); }
-.btn-small { padding: 6px 14px; font-size: 13px; }
+.btn-small { padding: 6px 14px; font-size: 12px; }
 /* 拼音练习 */
 .pinyin-q {
   background: #E8F5E9;
@@ -228,7 +231,7 @@ body {
   padding: 16px;
   margin: 10px 0;
 }
-.pinyin-q .q { font-size: 20px; color: var(--green); font-weight: bold; margin-bottom: 10px; }
+.pinyin-q .q { font-size: 19px; color: var(--green); font-weight: bold; margin-bottom: 10px; }
 .options { display: flex; gap: 10px; flex-wrap: wrap; }
 .option {
   padding: 8px 20px;
@@ -236,7 +239,7 @@ body {
   border: 2px solid var(--green);
   border-radius: 20px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 17px;
   transition: all 0.2s;
 }
 .option:hover { background: var(--green); color: #fff; }
@@ -253,11 +256,11 @@ body {
   gap: 12px;
   flex-wrap: wrap;
 }
-.math-q .formula { font-size: 24px; color: var(--orange); font-weight: bold; }
+.math-q .formula { font-size: 23px; color: var(--orange); font-weight: bold; }
 .math-input {
   width: 80px;
   padding: 8px;
-  font-size: 20px;
+  font-size: 19px;
   text-align: center;
   border: 2px solid var(--orange);
   border-radius: 10px;
@@ -269,7 +272,7 @@ body {
   background: var(--orange);
   color: #fff;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
 }
 /* 错题本 */
@@ -290,8 +293,8 @@ body {
   padding: 16px;
   margin: 10px 0;
 }
-.en-sentence { font-size: 20px; color: var(--blue); font-weight: bold; }
-.en-translation { color: #555; margin-top: 6px; font-size: 15px; }
+.en-sentence { font-size: 19px; color: var(--blue); font-weight: bold; }
+.en-translation { color: #555; margin-top: 6px; font-size: 14px; }
 .en-word {
   background: linear-gradient(135deg, #FFF9C4 0%, #FFF176 100%);
   border-radius: 16px;
@@ -301,9 +304,9 @@ body {
   transition: transform 0.2s;
 }
 .en-word:hover { transform: scale(1.05); }
-.en-word .w { font-size: 22px; font-weight: bold; color: #F57F17; }
-.en-word .p { font-size: 13px; color: #795548; margin: 4px 0; }
-.en-word .m { font-size: 16px; color: #333; }
+.en-word .w { font-size: 21px; font-weight: bold; color: #F57F17; }
+.en-word .p { font-size: 12px; color: #795548; margin: 4px 0; }
+.en-word .m { font-size: 15px; color: #333; }
 /* 游戏 */
 .game-area {
   background: #fff;
@@ -317,7 +320,7 @@ body {
   text-align: center;
   padding: 40px 20px;
 }
-.game-start h2 { font-size: 28px; color: var(--purple); margin-bottom: 16px; }
+.game-start h2 { font-size: 27px; color: var(--purple); margin-bottom: 16px; }
 .match-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -329,7 +332,7 @@ body {
   padding: 16px;
   border-radius: 14px;
   text-align: center;
-  font-size: 22px;
+  font-size: 21px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
@@ -360,7 +363,7 @@ body {
 }
 .goose {
   position: absolute;
-  font-size: 50px;
+  font-size: 48px;
   cursor: pointer;
   user-select: none;
   transition: transform 0.1s;
@@ -424,7 +427,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 19px;
   color: #fff;
   background: #fff;
   flex-shrink: 0;
@@ -435,8 +438,8 @@ body {
   border-color: var(--green);
 }
 .checkin-content { flex: 1; }
-.checkin-name { font-weight: bold; font-size: 16px; }
-.checkin-cat { font-size: 12px; color: #888; }
+.checkin-name { font-weight: bold; font-size: 15px; }
+.checkin-cat { font-size: 11px; color: #888; }
 .checkin-del {
   background: #ffcdd2;
   color: #c62828;
@@ -445,7 +448,7 @@ body {
   width: 28px;
   height: 28px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
 }
 .add-task-box {
   background: #fff;
@@ -462,7 +465,7 @@ body {
   border: 2px solid var(--pink);
   border-radius: 20px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
 }
 .add-task-box input { flex: 1; min-width: 150px; }
 .progress-bar {
@@ -482,7 +485,7 @@ body {
   justify-content: center;
   color: #fff;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 12px;
 }
 /* 奖励商店 */
 .reward-card {
@@ -503,8 +506,8 @@ body {
   height: 6px;
   background: var(--gradient, linear-gradient(90deg, #FFD93D, #FF8C42));
 }
-.reward-icon { font-size: 50px; margin: 10px 0; }
-.reward-name { font-size: 18px; font-weight: bold; margin: 8px 0; }
+.reward-icon { font-size: 48px; margin: 10px 0; }
+.reward-name { font-size: 17px; font-weight: bold; margin: 8px 0; }
 .reward-cost {
   display: inline-block;
   background: var(--yellow);
@@ -535,7 +538,7 @@ body {
   color: #fff;
   padding: 14px 28px;
   border-radius: 30px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: bold;
   box-shadow: 0 6px 20px rgba(0,0,0,0.2);
   z-index: 1000;
@@ -558,7 +561,7 @@ body {
   color: #fff;
   border-radius: 12px;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
 }
 .video-link::before { content: '🎬 '; }
 .writting-grid {
@@ -575,7 +578,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 30px;
   color: #FFA000;
   position: relative;
 }
@@ -593,8 +596,8 @@ body {
   padding: 20px;
   border-left: 6px solid var(--green);
 }
-.story-title { font-size: 22px; color: var(--green); font-weight: bold; margin-bottom: 10px; }
-.story-text { line-height: 2; color: #33691E; font-size: 16px; }
+.story-title { font-size: 21px; color: var(--green); font-weight: bold; margin-bottom: 10px; }
+.story-text { line-height: 2; color: #33691E; font-size: 15px; }
 /* 锻炼 */
 .exercise-item {
   background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
@@ -605,17 +608,78 @@ body {
   align-items: center;
   gap: 16px;
 }
-.exercise-icon { font-size: 40px; }
+.exercise-icon { font-size: 38px; }
 .exercise-info { flex: 1; }
-.exercise-name { font-weight: bold; font-size: 17px; color: var(--blue); }
-.exercise-time { color: #666; font-size: 14px; }
+.exercise-name { font-weight: bold; font-size: 16px; color: var(--blue); }
+.exercise-time { color: #666; font-size: 13px; }
 /* 响应式 */
 @media (max-width: 768px) {
-  .sidebar { width: 70px; padding: 12px 6px; }
+  .sidebar { width: 56px; padding: 8px 4px; }
   .logo, .logo-sub, .nav-item span:not(.nav-icon), .score-board { display: none; }
-  .nav-item { justify-content: center; padding: 12px; }
-  .main { margin-left: 70px; padding: 16px; }
-  .welcome-banner h1 { font-size: 24px; }
+  .nav-item { justify-content: center; padding: 10px 4px; }
+  .nav-item .nav-icon { font-size: 21px; }
+  .main { margin-left: 56px; padding: 12px; }
+  .welcome-banner { padding: 16px; }
+  .welcome-banner h1 { font-size: 19px; }
+  .welcome-banner p { font-size: 12px; }
+  .date-display { font-size: 11px; }
+  .stat-card { padding: 12px 8px; border-radius: 14px; }
+  .stat-icon { font-size: 27px; }
+  .stat-num { font-size: 23px; }
+  .stat-label { font-size: 11px; }
+  .card { padding: 14px; border-radius: 14px; }
+  .card-title { font-size: 17px; }
+  .section-title { font-size: 17px; }
+  .poem-box { padding: 14px; }
+  .poem-title { font-size: 19px; }
+  .poem-body { font-size: 15px; }
+  .idiom-story { font-size: 13px; line-height: 1.7; }
+  .pinyin-grid .pinyin-item { padding: 8px 4px; }
+  .pinyin-grid .pinyin-item .py { font-size: 17px; }
+  .pinyin-grid .pinyin-item .hz { font-size: 21px; }
+  .en-word { padding: 10px 8px; border-radius: 12px; }
+  .en-word .w { font-size: 17px; }
+  .en-word .p { font-size: 11px; }
+  .en-word .m { font-size: 13px; }
+  .math-grid .math-item { padding: 10px 6px; border-radius: 10px; }
+  .math-grid .math-item .q { font-size: 13px; }
+  .math-grid .math-item input { width: 50px; font-size: 15px; padding: 4px; }
+  .btn { padding: 10px 18px; font-size: 13px; border-radius: 12px; }
+  .btn-sm { padding: 6px 12px; font-size: 11px; }
+  .checkin-item { padding: 10px 12px; }
+  .checkin-item .ci-name { font-size: 13px; }
+  .reward-item { padding: 12px; }
+  .reward-item .ri-name { font-size: 13px; }
+  .reward-item .ri-cost { font-size: 12px; }
+  .add-task-box { flex-direction: column; gap: 8px; }
+  .add-task-box input { min-width: 0; width: 100%; }
+}
+/* 游戏区域横屏提示 */
+.game-landscape-hint {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  background: #fff3cd;
+  border-radius: 14px;
+  margin: 12px 0;
+  color: #856404;
+  font-size: 13px;
+}
+.game-landscape-hint .icon { font-size: 34px; display: block; margin-bottom: 8px; }
+@media (max-width: 768px) and (orientation: portrait) {
+  .game-landscape-hint { display: block; }
+  .game-area { display: none; }
+  .goose-game { display: none; }
+  .match-grid { display: none; }
+  .level-info { display: none; }
+}
+@media (max-width: 768px) and (orientation: landscape) {
+  .game-area { min-height: 300px; }
+  .goose-game { height: 320px; }
+  .goose { font-size: 38px; }
+  .match-item { padding: 12px; font-size: 17px; }
+  .match-grid { gap: 16px; }
+  .game-start h2 { font-size: 21px; }
 }
 .scroll-top {
   position: fixed;
@@ -629,7 +693,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 23px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   z-index: 99;
@@ -698,13 +762,13 @@ body {
   </div>
   <div class="card">
     <div class="card-title">💡 每日寄语</div>
-    <p id="dailyQuote" style="font-size:18px; color:#666; line-height:1.8;"></p>
+    <p id="dailyQuote" style="font-size:17px; color:#666; line-height:1.8;"></p>
   </div>
 </div>
 
 <!-- ============ 语文 ============ -->
 <div class="page" id="page-chinese">
-  <div class="page-title">📖 语文天地 <span style="font-size:16px; color:#888;">(每天30分钟)</span></div>
+  <div class="page-title">📖 语文天地 <span style="font-size:15px; color:#888;">(每天30分钟)</span></div>
   
   <div class="card">
     <div class="card-title">🎶 每日一首古诗</div>
@@ -763,7 +827,7 @@ body {
   <div class="page-title">🔢 数学乐园</div>
   
   <div class="card">
-    <div class="card-title">➕ 40以内计算题 <span style="font-size:13px; color:#888;">(含破十法、凑十法)</span></div>
+    <div class="card-title">➕ 40以内计算题 <span style="font-size:12px; color:#888;">(含破十法、凑十法)</span></div>
     <div id="mathQuestions"></div>
     <div style="text-align:center; margin-top:12px;">
       <button class="btn btn-orange" onclick="genMath()">🔄 换一批题</button>
@@ -813,7 +877,7 @@ body {
 
 <!-- ============ 锻炼 ============ -->
 <div class="page" id="page-exercise">
-  <div class="page-title">🏃 运动锻炼 <span style="font-size:16px; color:#888;">(每天1小时)</span></div>
+  <div class="page-title">🏃 运动锻炼 <span style="font-size:15px; color:#888;">(每天1小时)</span></div>
   <div class="card">
     <div class="card-title">⏰ 今日运动计划</div>
     <div id="exerciseList"></div>
@@ -840,14 +904,14 @@ body {
   <div class="grid-2">
     <div class="card" style="cursor:pointer;" onclick="showPage('game-pinyin', document.querySelectorAll('.nav-item')[5])">
       <div style="text-align:center; padding:20px;">
-        <div style="font-size:60px;">🔤</div>
+        <div style="font-size:57px;">🔤</div>
         <h3 style="color:var(--purple); margin:10px 0;">拼音文字对对碰</h3>
         <p style="color:#666;">闯关游戏，拼一拼配一对！</p>
       </div>
     </div>
     <div class="card" style="cursor:pointer;" onclick="startGooseGame()">
       <div style="text-align:center; padding:20px;">
-        <div style="font-size:60px;">🦢</div>
+        <div style="font-size:57px;">🦢</div>
         <h3 style="color:var(--blue); margin:10px 0;">抓大鹅学单词</h3>
         <p style="color:#666;">抓住大鹅学习英语单词！</p>
       </div>
@@ -857,6 +921,10 @@ body {
   <!-- 拼音对对碰游戏 -->
   <div class="card" id="pinyinGame">
     <div class="card-title">🔤 拼音文字对对碰闯关</div>
+    <div class="game-landscape-hint">
+      <span class="icon">📱➡️🖥️</span>
+      <b>游戏区域较大，请将手机横屏放置以获得更好体验</b>
+    </div>
     <div class="level-info">
       <span>🏆 第 <span id="pgLevel">1</span> 关</span>
       <span>⭐ 得分: <span id="pgScore">0</span></span>
@@ -872,6 +940,10 @@ body {
   <div class="card" id="gooseGameCard">
     <div class="card-title">🦢 抓大鹅学单词</div>
     <p style="color:#666; text-align:center; margin-bottom:12px;">点击屏幕上的大鹅抓住它，并学习对应单词！</p>
+    <div class="game-landscape-hint">
+      <span class="icon">📱➡️🖥️</span>
+      <b>游戏区域较大，请将手机横屏放置以获得更好体验</b>
+    </div>
     <div class="goose-game" id="gooseGameArea">
       <div class="game-hud">
         <div class="hud-item">🦢 抓到: <span id="gooseCount">0</span></div>
@@ -879,7 +951,7 @@ body {
         <div class="hud-item">⭐ <span id="gooseScore">0</span>分</div>
       </div>
       <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#fff;" id="gooseStart">
-        <h2 style="font-size:32px;">🦢 抓大鹅学单词</h2>
+        <h2 style="font-size:30px;">🦢 抓大鹅学单词</h2>
         <p style="margin:12px 0;">30秒内抓住大鹅，学习单词！</p>
         <button class="btn btn-yellow" onclick="startGooseGame()">开始游戏</button>
       </div>
@@ -905,7 +977,7 @@ body {
       </select>
       <button class="btn btn-pink" onclick="addTask()">添加任务</button>
     </div>
-    <p style="color:#888; font-size:13px;">💡 完成每日所有打卡任务奖励1积分</p>
+    <p style="color:#888; font-size:12px;">💡 完成每日所有打卡任务奖励1积分</p>
   </div>
 
   <div class="card">
@@ -924,7 +996,7 @@ body {
 <div class="page" id="page-rewards">
   <div class="page-title">🎁 奖励商店</div>
   <div class="card" style="background:linear-gradient(135deg, #FFD93D, #FF8C42); color:#fff;">
-    <h2 style="text-align:center; font-size:24px;">我的积分: <span id="rewardScore">0</span> ⭐</h2>
+    <h2 style="text-align:center; font-size:23px;">我的积分: <span id="rewardScore">0</span> ⭐</h2>
     <p style="text-align:center; margin-top:8px;">完成每日所有打卡获得1积分，积分可兑换奖励！</p>
   </div>
 
@@ -1239,7 +1311,7 @@ function genNumberSense() {
   if (!nums.includes(target)) nums[Math.floor(Math.random()*6)] = target;
   nums.sort(() => Math.random()-0.5);
   document.getElementById('numberSense').innerHTML = 
-    '<p style="font-size:18px; margin-bottom:12px;">找到数字 <b style="color:var(--orange); font-size:24px;">'+target+'</b></p>'+
+    '<p style="font-size:17px; margin-bottom:12px;">找到数字 <b style="color:var(--orange); font-size:23px;">'+target+'</b></p>'+
     '<div class="grid-3" style="gap:8px;">'+
     nums.map(n => '<div class="match-item" style="background:'+(n===target?'#FFF3E0':'#E1F5FE')+'; color:'+(n===target?'#FF8C42':'#0277BD')+';" onclick="senseClick(this,'+(n===target)+')">'+n+'</div>').join('')+
     '</div><p id="senseResult" style="margin-top:12px;"></p>';
@@ -1309,7 +1381,7 @@ function showEnglish() {
   ).join('');
   let wArr = enWordsData[getDailyIndex(enWordsData.length)];
   document.getElementById('enWords').innerHTML = wArr.map(w => 
-    '<div class="en-word" onclick="speakText(\''+w.w+'\')"><div style="font-size:36px;">'+w.i+'</div><div class="w">'+w.w+'</div><div class="p">/'+w.p+'/</div><div class="m">'+w.m+'</div></div>'
+    '<div class="en-word" onclick="speakText(\''+w.w+'\')"><div style="font-size:34px;">'+w.i+'</div><div class="w">'+w.w+'</div><div class="p">/'+w.p+'/</div><div class="m">'+w.m+'</div></div>'
   ).join('');
 }
 function speakAllWords() {
@@ -1445,9 +1517,9 @@ function startGooseGame() {
       document.querySelectorAll('.goose').forEach(g => g.remove());
       document.getElementById('gooseStart').style.display = 'block';
       document.getElementById('gooseStart').innerHTML = 
-        '<h2 style="font-size:28px;">🎉 游戏结束！</h2>'+
-        '<p style="margin:12px 0; font-size:20px;">抓到 '+gooseCnt+' 只大鹅</p>'+
-        '<p style="margin:12px 0; font-size:20px;">得分：'+gooseScr+' 分</p>'+
+        '<h2 style="font-size:27px;">🎉 游戏结束！</h2>'+
+        '<p style="margin:12px 0; font-size:19px;">抓到 '+gooseCnt+' 只大鹅</p>'+
+        '<p style="margin:12px 0; font-size:19px;">得分：'+gooseScr+' 分</p>'+
         '<button class="btn btn-yellow" onclick="startGooseGame()">再玩一次</button>';
     }
   }, 1000);
@@ -1463,7 +1535,7 @@ function spawnGoose() {
   goose.style.left = (10 + Math.random()*70) + '%';
   goose.style.top = (20 + Math.random()*60) + '%';
   let wordDiv = document.createElement('div');
-  wordDiv.style.cssText = 'font-size:14px; color:#333; background:#fff; padding:2px 8px; border-radius:10px; margin-top:-5px;';
+  wordDiv.style.cssText = 'font-size:13px; color:#333; background:#fff; padding:2px 8px; border-radius:10px; margin-top:-5px;';
   wordDiv.textContent = w.i + ' ' + w.w;
   goose.appendChild(wordDiv);
   goose.onclick = function() {
@@ -1649,16 +1721,16 @@ function updateHomeStats() {
   document.getElementById('totalDone').textContent = totalDone;
   let html = tasks.map(t => 
     '<div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #eee;">'+
-    '<span style="font-size:18px;">'+(checkin[t.id]?'✅':'⬜')+'</span>'+
+    '<span style="font-size:17px;">'+(checkin[t.id]?'✅':'⬜')+'</span>'+
     '<span style="flex:1;">'+t.name+'</span>'+
-    '<span style="color:#888; font-size:13px;">'+t.cat+'</span></div>'
+    '<span style="color:#888; font-size:12px;">'+t.cat+'</span></div>'
   ).join('');
   document.getElementById('homePlan').innerHTML = html;
   let plan = tasks.map(t => 
     '<div style="display:flex; align-items:center; gap:10px; padding:10px; border-radius:12px; margin:6px 0; background:'+(checkin[t.id]?'#C8E6C9':'#fff')+'; box-shadow:0 2px 6px rgba(0,0,0,0.05);">'+
-    '<span style="font-size:20px;">'+(checkin[t.id]?'✅':'⬜')+'</span>'+
+    '<span style="font-size:19px;">'+(checkin[t.id]?'✅':'⬜')+'</span>'+
     '<span style="flex:1; font-weight:bold;">'+t.name+'</span>'+
-    '<span style="color:#888; font-size:12px; background:#f0f0f0; padding:2px 8px; border-radius:10px;">'+t.cat+'</span></div>'
+    '<span style="color:#888; font-size:11px; background:#f0f0f0; padding:2px 8px; border-radius:10px;">'+t.cat+'</span></div>'
   ).join('');
   document.getElementById('homePlan').innerHTML = plan;
 }
