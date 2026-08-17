@@ -298,10 +298,11 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="poems" onclick="switchPanel('poems')">
       <span class="icon">📜</span><span class="label">古诗诵读</span>
     </div>
-    <a class="nav‑link" href="https://1948421773.github.io/github.io/index.html" target="_blank">二年级作业</a>
+    <div class="nav-divider"></div>
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
+    <a class="nav‑link" href="https://1948421773.github.io/github.io/fifthgrade.html" target="_blank">二年级作业</a>
     <div class="pet-mini" id="petMini">
       <div class="pet-emoji">🥚</div>
       <div class="pet-lvl">Lv.1</div>
@@ -789,7 +790,12 @@ const READING_ARTICLES = [
       '人也应该像种子一样，无论遇到多大的困难，都要保持内心的力量，努力向上生长。'
     ],
     keywords: ['积(yùn)蓄', 'qīn(侵)略', 'yóu(由)于', '坚(jiān)硬'],
-    analysis: '本文运用了拟人手法，将种子人格化。难点："积蓄""敬畏"两个词语的理解。重点：理解种子精神的内涵——不畏艰难、积蓄力量、向上生长。'
+    analysis: '本文运用了拟人手法，将种子人格化。难点："积蓄""敬畏"两个词语的理解。重点：理解种子精神的内涵——不畏艰难、积蓄力量、向上生长。',
+    questions: [
+      {q: '种子最让人敬畏的力量是什么？', a: '种子能够掀翻压在头上的石头，这种力量让人敬畏。'},
+      {q: '文中"积蓄"一词是什么意思？', a: '积蓄：一点一点地聚集、积累。文中指种子默默地积累生长的力量。'},
+      {q: '这篇文章告诉了我们什么道理？', a: '人也应该像种子一样，无论遇到多大的困难，都要保持内心的力量，努力向上生长。'}
+    ]
   },
   {
     title: '一盏灯的温暖',
@@ -801,7 +807,12 @@ const READING_ARTICLES = [
       '让我们也做别人黑暗中的一盏灯，给身边的人带去光明和温暖。'
     ],
     keywords: ['恐惧(kòng)', 'róng(融)化', 'téng(疼)痛', '温(wēn)暖'],
-    analysis: '本文以"灯"为线索，从具体的灯到象征意义的灯。难点："驱散"一词的理解和"灯"的象征意义。重点：理解"做别人黑暗中的灯"的人生哲理。'
+    analysis: '本文以"灯"为线索，从具体的灯到象征意义的灯。难点："驱散"一词的理解和"灯"的象征意义。重点：理解"做别人黑暗中的灯"的人生哲理。',
+    questions: [
+      {q: '文中的"灯"象征着什么？', a: '灯象征着温暖、希望和关爱，也象征着给予他人光明和力量的善举。'},
+      {q: '"驱散"一词在文中是什么意思？', a: '驱散：赶跑、消除。文中指灯光的温暖消除了黑暗带来的恐惧。'},
+      {q: '我们怎样才能成为别人黑暗中的一盏灯？', a: '通过一句鼓励的话、一个温暖的拥抱，或者一个理解的眼神，给身边的人带去光明和温暖。'}
+    ]
   },
   {
     title: '一棵树的启示',
@@ -813,7 +824,12 @@ const READING_ARTICLES = [
       '该开花时开花，该落叶时落叶，一切都是最好的安排。'
     ],
     keywords: ['矗(chù)立', 'nu(nù)力', 'nán(难)过', 'qiāo(悄)然'],
-    analysis: '本文运用排比句描写四季，语言优美。难点：理解"按自己节奏生长"的深刻含义。重点：领悟顺应自然、不强求的人生智慧。'
+    analysis: '本文运用排比句描写四季，语言优美。难点：理解"按自己节奏生长"的深刻含义。重点：领悟顺应自然、不强求的人生智慧。',
+    questions: [
+      {q: '老槐树一年四季有什么不同的表现？', a: '春天抽新芽，夏天撑浓荫，秋天落叶，冬天矗立寒风中，不急不躁地生长。'},
+      {q: '"矗立"一词说明了老槐树怎样的品质？', a: '矗立：高耸挺立。说明老槐树在寒风中依然挺拔坚韧，体现了顽强的生命力。'},
+      {q: '老槐树教会了我们什么人生道理？', a: '生活有四季，每个季节都有意义；不要急于求成，要按自己的节奏生长，一切都是最好的安排。'}
+    ]
   },
   {
     title: '一滴水的旅程',
@@ -825,7 +841,12 @@ const READING_ARTICLES = [
       '我明白了，生命的意义不在于停留在哪里，而在于不停地流动，不停地成长。'
     ],
     keywords: ['渗(shèn)入', 'huì(汇)合', 'xī(吸)收', 'péng(蓬)勃'],
-    analysis: '本文以第一人称拟人化写水滴的旅行。难点：理解水循环的比喻意义和"不停地成长"的内涵。重点：感受"流动"和"成长"的人生哲理。'
+    analysis: '本文以第一人称拟人化写水滴的旅行。难点：理解水循环的比喻意义和"不停地成长"的内涵。重点：感受"流动"和"成长"的人生哲理。',
+    questions: [
+      {q: '一滴水的旅程经过了哪些地方？', a: '云层→树叶→草地→地下→小溪→大河→大海→(蒸发)天空，开始新的旅程。'},
+      {q: '"渗入"一词在文中指什么？', a: '渗入：液体慢慢透入。文中指水滴慢慢渗入地下。'},
+      {q: '这滴水从旅程中明白了什么道理？', a: '生命的意义不在于停留在哪里，而在于不停地流动，不停地成长。'}
+    ]
   },
   {
     title: '石缝里的小草',
@@ -837,7 +858,12 @@ const READING_ARTICLES = [
       '生命是顽强的，只要心中有光，哪里都能开出美丽的花。'
     ],
     keywords: ['缝(xì)隙', 'zh(振)奋', 'wán(顽)强', 'zh(振)撼'],
-    analysis: '本文借物喻理，借小草言志。难点：理解"顽强的生命"和"心中有光"的深层含义。重点：体会逆境中奋斗的精神力量。'
+    analysis: '本文借物喻理，借小草言志。难点：理解"顽强的生命"和"心中有光"的深层含义。重点：体会逆境中奋斗的精神力量。',
+    questions: [
+      {q: '石缝里的小草生长环境是怎样的？', a: '没有肥沃的土壤，没有充足的水分，也没有人照料，环境十分艰苦。'},
+      {q: '小草开出的花有什么特点？作者为什么觉得它有力量？', a: '花不大也不美丽，但能在艰难环境中生存开花，散发着生命的力量，令人震撼。'},
+      {q: '"只要心中有光"中的"光"指什么？', a: '"光"象征着希望、信念和积极向上的心态。只要心怀希望，任何地方都能绽放精彩。'}
+    ]
   },
   {
     title: '一杯水的智慧',
@@ -849,7 +875,12 @@ const READING_ARTICLES = [
       '所以，要学会放下，及时放下心中的那杯水。'
     ],
     keywords: ['酸(suān)痛', 'má(麻)木', 'fán(烦)恼', 'y(压)抑'],
-    analysis: '本文通过类比说明道理。难点：理解"水"的比喻意义和"放下"的哲学。重点：感悟及时放下烦恼的人生智慧。'
+    analysis: '本文通过类比说明道理。难点：理解"水"的比喻意义和"放下"的哲学。重点：感悟及时放下烦恼的人生智慧。',
+    questions: [
+      {q: '老师用一杯水想说明什么道理？', a: '一杯水的重量不重要，拿的时间越久越沉重；烦恼也是这样，想得越久越沉重，要学会放下。'},
+      {q: '为什么"拿一整天"手臂会麻木？', a: '因为长时间承受同样的重量，手臂会疲劳、麻木。比喻烦恼积压久了会压垮自己。'},
+      {q: '"放下心中的那杯水"是什么意思？', a: '指及时放下心中的烦恼，不要让烦恼长期积压，影响心情和生活。'}
+    ]
   }
 ];
 
@@ -876,21 +907,20 @@ function renderSentences() {
     </div>
   `).join('');
   
-  // 阅读理解题
-  let quizHtml = `
-    <div style="background:#fff8e1;padding:14px;border-radius:12px;margin-top:12px">
-      <div style="font-weight:700;color:#e65100;margin-bottom:8px">📝 阅读理解题</div>
-      <div style="margin-bottom:10px">${article.quiz ? article.quiz.q : '本文主要告诉了我们什么道理？请用自己的话回答。'}</div>
-      <textarea id="readingAnswer" placeholder="请输入你的答案..." style="width:100%;min-height:80px;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:15px;font-family:inherit"></textarea>
-      <button class="btn btn-warning" style="margin-top:8px" onclick="showReadingAnalysis()">查看答案与重难点分析</button>
-      <div id="readingAnalysis" style="margin-top:12px;padding:14px;background:#e3f2fd;border-radius:10px;display:none">
-        <div style="font-weight:700;color:#1976d2;margin-bottom:6px">💡 参考答案</div>
-        <div style="margin-bottom:10px">${article.quiz ? article.quiz.a : '本文通过生动的描写，告诉我们要像文章中所描述的那样，保持积极的心态，努力向上，珍惜生命，做一个有力量的人。'}</div>
-        <div style="font-weight:700;color:#1976d2;margin-bottom:6px">🔍 重难点分析</div>
-        <div style="line-height:1.8">${article.analysis}</div>
+  // 阅读理解3道题
+  const qs = article.questions || [];
+  let quizHtml = qs.map((item, i) => `
+    <div style="background:#fff8e1;padding:14px;border-radius:12px;margin-bottom:12px">
+      <div style="font-weight:700;color:#e65100;margin-bottom:8px">📝 第${i+1}题</div>
+      <div style="margin-bottom:10px;font-size:15px">${item.q}</div>
+      <textarea placeholder="请输入你的答案..." style="width:100%;min-height:60px;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:15px;font-family:inherit;margin-bottom:8px"></textarea>
+      <button class="btn btn-warning btn-sm" onclick="toggleAnswer(${i})">💡 查看答案提示</button>
+      <div id="answer-${i}" style="margin-top:8px;padding:12px;background:#e3f2fd;border-radius:10px;display:none">
+        <div style="font-weight:700;color:#1976d2;margin-bottom:4px">参考答案</div>
+        <div style="line-height:1.7">${item.a}</div>
       </div>
     </div>
-  `;
+  `).join('');
   
   c.innerHTML = `
     <div class="card">
@@ -914,17 +944,13 @@ function renderSentences() {
       </div>
     </div>
     <div class="card">
-      <div class="card-title">✏️ 好句摘录</div>
-      <div class="card-subtitle">将文章中你认为优美的句子摘抄下来</div>
-      <div style="font-size:14px;color:#666;margin-bottom:10px;background:#f8f9fc;padding:10px;border-radius:8px">
-        <b>推荐摘抄：</b><br>${article.sentences.map((s,i) => `${i+1}. ${s}`).join('<br>')}
-      </div>
-    </div>
-    ${renderUploadArea('sentences','好句摘录')}
-    <div class="card">
-      <div class="card-title">📝 阅读理解</div>
-      <div class="card-subtitle">阅读完文章后，回答下面的问题</div>
+      <div class="card-title">📝 阅读理解（共${qs.length}题）</div>
+      <div class="card-subtitle">阅读完文章后，回答下面的问题，作答后可查看答案提示</div>
       ${quizHtml}
+      <div style="margin-top:12px;padding:12px;background:#e8f5e9;border-radius:10px">
+        <div style="font-weight:700;color:#2e7d32;margin-bottom:6px">🔍 重难点分析</div>
+        <div style="line-height:1.8;font-size:14px">${article.analysis}</div>
+      </div>
     </div>
     <div class="card">${renderCheckinBtn('sentences')}</div>
   `;
@@ -932,9 +958,14 @@ function renderSentences() {
   document.getElementById('articleSpeakBtn').onclick = () => speak(article.content);
 }
 
-function showReadingAnalysis() {
-  document.getElementById('readingAnalysis').style.display = 'block';
-  if (!isModuleChecked('sentences')) { checkin('sentences'); setTimeout(()=>switchPanel('sentences'),800); }
+function toggleAnswer(idx) {
+  const el = document.getElementById('answer-' + idx);
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    if (!isModuleChecked('sentences')) { checkin('sentences'); setTimeout(()=>switchPanel('sentences'),800); }
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 // ===================== 数学计算 =====================
