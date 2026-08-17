@@ -302,7 +302,7 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
-    <a class="nav‑link" href="https://1948421773.github.io/github.io/fifthgrade.html" target="_blank">二年级作业</a>
+	<a class="nav‑link" href="https://1948421773.github.io/github.io/index.html" target="_blank">二年级作业</a>
     <div class="pet-mini" id="petMini">
       <div class="pet-emoji">🥚</div>
       <div class="pet-lvl">Lv.1</div>
@@ -338,7 +338,8 @@ let state = {
   uploads: {}, // {day_module: [base64]}
   recordings: {},
   wrongQuestions: [],
-  petFeed: 0
+  petFeed: 0,
+  imitations: {} // {day: [student input strings]}
 };
 
 const MODULES = ['chars','sentences','math','words','reading','physics','logic','poems','pet'];
@@ -692,6 +693,105 @@ const CHAR_DATA = [
   ]
 ];
 
+// ===================== 四年级难长句（好词好句模仿） =====================
+const IMI_DATA = [
+  {
+    type: '比喻句',
+    tip: '用"像/仿佛/如同"把甲事物比作乙事物',
+    examples: [
+      '弯弯的月亮像一条小船挂在夜空中。',
+      '美丽的彩虹仿佛一座七彩的桥横跨天际。',
+      '金黄的稻田如同铺了一地的金子。'
+    ]
+  },
+  {
+    type: '拟人句',
+    tip: '把物当作人来写，赋予人的动作、神态、语言',
+    examples: [
+      '小草偷偷地从土里钻出来，嫩嫩的，绿绿的。',
+      '春风又绿江南岸，明月何时照我还。',
+      '花儿笑弯了腰，树叶拍着手。'
+    ]
+  },
+  {
+    type: '排比句',
+    tip: '三个或三个以上结构相同、意思相近的句子连用',
+    examples: [
+      '燕子去了，有再来的时候；杨柳枯了，有再青的时候；桃花谢了，有再开的时候。',
+      '爱心是一片照射在冬日的阳光，使贫病交迫的人感到人间的温暖；爱心是一泓出现在沙漠里的泉水，使濒临绝境的人重新看到生活的希望；爱心是一首飘荡在夜空的歌谣，使孤苦无依的人获得心灵的慰藉。',
+      '山朗润起来了，水涨起来了，太阳的脸红起来了。'
+    ]
+  },
+  {
+    type: '夸张句',
+    tip: '故意夸大或缩小事实，突出事物的特征',
+    examples: [
+      '飞流直下三千尺，疑是银河落九天。',
+      '巴掌大的地方，怎么容得下这么多人？',
+      '他饿得可以吃下一头牛。'
+    ]
+  },
+  {
+    type: '反问句',
+    tip: '用疑问句的形式表达确定的意思，加强语气',
+    examples: [
+      '难道我们不应该珍惜时间吗？',
+      '这比山还高比海还深的情谊，我们怎么能忘怀？',
+      '遇到困难，难道我们就退缩了吗？'
+    ]
+  },
+  {
+    type: '设问句',
+    tip: '自问自答，引起读者思考',
+    examples: [
+      '什么是友谊？友谊是大海中的灯塔，是沙漠中的绿洲。',
+      '花儿为什么这样红？首先有它的物质基础。',
+      '我们的幸福生活从哪里来？是无数革命先烈用鲜血换来的。'
+    ]
+  },
+  {
+    type: '对偶句',
+    tip: '字数相等、结构相同、意义相关的两个句子或短语',
+    examples: [
+      '海内存知己，天涯若比邻。',
+      '接天莲叶无穷碧，映日荷花别样红。',
+      '书山有路勤为径，学海无涯苦作舟。'
+    ]
+  },
+  {
+    type: '双重否定句',
+    tip: '用两个否定词表达肯定的意思，语气更强烈',
+    examples: [
+      '你不能不承认，春天是美好的。',
+      '没有人不被他的精神所感动。',
+      '这件事我不得不做。'
+    ]
+  },
+  {
+    type: '长单句（修饰语多）',
+    tip: '一个句子里有多个修饰语，层层递进',
+    examples: [
+      '我看见一位穿着红色衣服的小女孩在公园里快乐地追逐着一只美丽的蝴蝶。',
+      '老师用充满爱的目光注视着正在认真做作业的同学们。',
+      '在一个月黑风高的夜晚，一位白发苍苍的老爷爷拄着拐杖艰难地走在泥泞的小路上。'
+    ]
+  },
+  {
+    type: '复句（关联词语）',
+    tip: '用关联词语连接分句，表达复杂逻辑关系',
+    examples: [
+      '虽然我学习很努力，但是我的成绩还是没有提高。',
+      '只要我们坚持不懈地努力，就一定能取得成功。',
+      '因为他平时刻苦训练，所以在比赛中取得了优异的成绩。'
+    ]
+  }
+];
+
+function getImiData() {
+  const idx = (state.day - 1) % IMI_DATA.length;
+  return IMI_DATA[idx];
+}
+
 function getCharData() {
   const group = Math.floor((state.day - 1) / 10);
   return CHAR_DATA[group % CHAR_DATA.length];
@@ -700,12 +800,26 @@ function getCharData() {
 function renderChars() {
   const c = document.getElementById('content');
   const data = getCharData();
+  const imi = getImiData();
+  const saved = state.imitations[state.day] || new Array(imi.examples.length).fill('');
   let html = data.map((item, i) => `
     <div class="char-card">
       <button class="speak-btn" onclick="speak('${item.c}')">🔊</button>
       <div class="char">${item.c}</div>
       <div class="pinyin">${item.p}</div>
       <div class="word">${item.w}</div>
+    </div>
+  `).join('');
+  
+  let imiHtml = imi.examples.map((ex, i) => `
+    <div style="background:#f8f9fc;padding:14px;border-radius:12px;margin-bottom:12px;border-left:4px solid var(--primary)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="background:var(--primary);color:#fff;padding:3px 10px;border-radius:10px;font-size:13px;font-weight:700">范例${i+1}</span>
+        <button class="speak-btn" onclick="speak('${ex}')">🔊</button>
+      </div>
+      <div style="font-size:15px;line-height:1.8;color:#333;margin-bottom:10px;font-family:inherit">${ex}</div>
+      <div style="font-size:12px;color:#888;margin-bottom:4px">✏️ 请模仿上面的${imi.type}，自己写一句：</div>
+      <textarea id="imi-${i}" placeholder="在此输入你的模仿句..." style="width:100%;min-height:60px;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:15px;font-family:inherit" oninput="saveImi(${i}, this.value)">${saved[i] || ''}</textarea>
     </div>
   `).join('');
 
@@ -717,13 +831,21 @@ function renderChars() {
     </div>
     <div class="char-grid">${html}</div>
     <div class="card">
-      <div class="card-title">✍️ 好词摘录</div>
-      <div class="card-subtitle">请将以上${data.length}个生字中的好词摘抄到积累本，完成后拍照上传</div>
-      <p style="font-size:14px;color:#666;margin-bottom:10px">摘抄内容：${data.map(d=>d.c).join('、')}</p>
+      <div class="card-title">✍️ 好词好句模仿</div>
+      <div class="card-subtitle">今日句型：<b style="color:var(--primary)">${imi.type}</b> · 技巧：${imi.tip}</div>
+      ${imiHtml}
+      <div style="margin-top:12px;padding:12px;background:#e8f5e9;border-radius:10px;font-size:13px;color:#2e7d32">
+        💡 小提示：仔细观察范例句子的结构和修辞手法，模仿着写一句内容不同但句型相同的句子。写完后点击下方打卡。
+      </div>
     </div>
-    ${renderUploadArea('chars','好词摘录')}
     <div class="card">${renderCheckinBtn('chars')}</div>
   `;
+}
+
+function saveImi(idx, val) {
+  if (!state.imitations[state.day]) state.imitations[state.day] = new Array(getImiData().examples.length).fill('');
+  state.imitations[state.day][idx] = val;
+  saveState();
 }
 
 // ===================== 句子积累 =====================
