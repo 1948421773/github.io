@@ -189,6 +189,11 @@ body {
   transition: transform 0.2s;
 }
 .char-card:hover { transform: scale(1.05); }
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
 .char-big { font-size: 46px; font-weight: bold; color: var(--blue); }
 .char-pinyin { font-size: 17px; color: #0277BD; margin-top: 4px; }
 .char-word { font-size: 13px; color: #555; margin-top: 4px; }
@@ -633,10 +638,26 @@ body {
   .poem-box { padding: 14px; }
   .poem-title { font-size: 19px; }
   .poem-body { font-size: 15px; }
+  .idiom-box { padding: 14px; }
+  .idiom-name { font-size: 19px; }
   .idiom-story { font-size: 13px; line-height: 1.7; }
+  .char-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+  .char-card { padding: 10px 6px; border-radius: 12px; }
+  .char-big { font-size: 32px; }
+  .char-pinyin { font-size: 14px; }
+  .char-word { font-size: 12px; }
   .pinyin-grid .pinyin-item { padding: 8px 4px; }
   .pinyin-grid .pinyin-item .py { font-size: 17px; }
   .pinyin-grid .pinyin-item .hz { font-size: 21px; }
+  .pinyin-q { padding: 12px; }
+  .pinyin-q .q { font-size: 15px; }
+  .option { padding: 6px 14px; font-size: 14px; }
+  .writting-grid { grid-template-columns: repeat(4, 52px); gap: 6px; }
+  .tian-cell { width: 52px; height: 52px; font-size: 26px; }
+  .video-link { padding: 8px 12px; font-size: 12px; }
+  .story-box { padding: 14px; }
+  .story-title { font-size: 18px; }
+  .story-text { font-size: 13px; }
   .en-word { padding: 10px 8px; border-radius: 12px; }
   .en-word .w { font-size: 17px; }
   .en-word .p { font-size: 11px; }
@@ -779,15 +800,14 @@ body {
     </div>
   </div>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">✍️ 每日成语故事</div>
-      <div class="idiom-box" id="idiomBox"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">🆕 每日新认识10个字</div>
-      <div class="grid-2" id="newChars" style="gap:8px;"></div>
-    </div>
+  <div class="card">
+    <div class="card-title">✍️ 每日成语故事</div>
+    <div class="idiom-box" id="idiomBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🆕 每日新认识10个字</div>
+    <div class="char-grid" id="newChars"></div>
   </div>
 
   <div class="card">
