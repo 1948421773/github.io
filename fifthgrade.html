@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材5</title>
+<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -501,13 +501,24 @@ function getSharedTTSAudio() {
   return _sharedTTSAudio;
 }
 
-// ---------- 在线 TTS fallback（有道词典API，手机浏览器也能用） ----------
+// 静音 MP3 base64 data-uri（约 0.1 秒无声，用于在手势栈内 prime 拿 autoplay 授权，100% 能成功）
+var _SILENT_MP3 = 'data:audio/mpeg;base64,/+MYxAAAAANIAUAAAASEEB/jwOFM/0MM/90b/+RhST//w4NFwOjf///PZu////9lns5GFDv//l9GlUIEEIAAAgIg8Ir/JGq3/+MYxDsLIj5QMYcoAP0vvlj9VKTf//wWMHAYk9s78/////2gA30cO+0uU////K370wK/5u685rAAB9AADQOaB7dHOL///P/f///3L//5g/5XkP/+MYxBsYgKABwBwJACQAMTAA1gHd2F2ZQBdAGIAYQB2AGkAAAAIAAN/+MYxAYkAAAAAAEgA3AAAv/ufMf9h160b66G89Tj+IAAAAAD/+MYxCYkQAAAAAEgAAAAAAAAAAAAAAAPsAAAD/+MYxDYkAAAAAAEgA3AAAABX+Z+f94U4g797J6t6l1gAD//7sA';
+
+// ---------- 在线 TTS：中文用百度 gettts（更稳定），英文保持有道 type=2（用户已验证英语没问题） ----------
+function buildOnlineTTSUrl(text, isEnglish) {
+  var encoded = encodeURIComponent(text);
+  if (isEnglish) {
+    // 英语按用户要求不改动：保持原有道 type=2（美式发音，已验证正常）
+    return 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=2';
+  }
+  // 中文：改用百度翻译 gettts 接口，中文稳定性远高于有道 type=1
+  // spd=4 对应小朋友友好的中等语速；lan=zh 为中文女声；source=web 标识来源
+  return 'https://fanyi.baidu.com/gettts?lan=zh&text=' + encoded + '&spd=4&source=web';
+}
+
 function speakWithOnlineTTS(text, isEnglish, onend) {
   try {
-    var encoded = encodeURIComponent(text);
-    var url = isEnglish
-      ? 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=2'
-      : 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=1';
+    var url = buildOnlineTTSUrl(text, isEnglish);
     var audio = getSharedTTSAudio();
     if (!audio) { if (onend) onend(); return false; }
     try { audio.pause(); } catch(e) {}
@@ -521,13 +532,26 @@ function speakWithOnlineTTS(text, isEnglish, onend) {
       if (onend) onend();
     }
     audio.onended = done;
-    audio.onerror = function(e) { console.warn('Online TTS error:', e, url); done(); };
+    audio.onerror = function(e) {
+      console.warn('Online TTS error:', e, url);
+      // 百度接口失败时再兜底回退到有道 type=1（仅中文）
+      if (!isEnglish) {
+        try {
+          audio.onerror = done;
+          audio.src = buildOnlineTTSUrl_backup(text);
+          var pp = audio.play();
+          if (pp && pp.catch) pp.catch(function(){ done(); });
+          return;
+        } catch(e2) {}
+      }
+      done();
+    };
     audio.src = url;
     try {
       var p = audio.play();
       if (p && typeof p.then === 'function') {
         p.then(function(){}).catch(function(e) {
-          console.warn('Audio play blocked (try user-gesture scope):', e);
+          console.warn('Audio play blocked (should be in user-gesture scope):', e);
           done();
         });
       }
@@ -535,8 +559,11 @@ function speakWithOnlineTTS(text, isEnglish, onend) {
     return true;
   } catch(e) { if (onend) onend(); return false; }
 }
+function buildOnlineTTSUrl_backup(text) {
+  return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=1&le=zh';
+}
 
-// 检测是否为移动端（手机/平板）：移动端的中文 Web Speech 经常"触发 onstart 但静默"的假阳性，所以强制走在线 TTS
+// 检测是否为移动端：移动端的中文 Web Speech 经常"触发 onstart 但静默"的假阳性，强制走在线 TTS
 function isMobileDevice() {
   return /Android|iPhone|iPad|iPod|Mobile|HarmonyOS|XiaoMi|HUAWEI|MQQBrowser|UCBrowser/i.test(navigator.userAgent || '');
 }
@@ -544,22 +571,29 @@ function isMobileDevice() {
 // 估算中文文本按正常语速朗读需要的最少毫秒数（3字/秒是小朋友语速下限，比这快很多肯定是空播放假阳性）
 function estimateChineseMinMs(text) {
   if (!text) return 0;
-  // 中文字符（含标点）数 × 250ms/字，最少 800ms，英文单词按每词 400ms
   var zhChars = (text.match(/[\u4e00-\u9fa5，。？！、；：""''（）《》…—]/g) || []).length;
   var enWords = (text.replace(/[\u4e00-\u9fa5]/g, ' ').match(/[a-zA-Z]{2,}/g) || []).length;
   return Math.max(800, zhChars * 250 + enWords * 400);
 }
 
-// ---------- 核心朗读函数（必须在用户手势同步调用栈中执行；内部 1.2s fallback 必须复用已授权的共享 audio） ----------
+// ---------- 核心朗读函数（必须在用户手势同步调用栈中执行） ----------
 function doSpeak(text, isEnglish, onend) {
   var hasWebSpeech = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
 
-  // 先同步"占坑"共享 audio：哪怕不播，也在手势栈里对 audio 元素做一次 play→pause 拿到 autoplay 授权
+  // 【关键修复 1：短路直连必须放在 prime 之前】
+  // 移动端+中文：直接同步走在线 TTS（手势栈内 100% 授权），完全跳过 prime 占坑的空 src play 竞态
+  if (!isEnglish && isMobileDevice()) {
+    return speakWithOnlineTTS(text, false, onend);
+  }
+
+  // 【关键修复 2：prime 占坑改用静音 data-uri mp3，不再 play 空 src（空src在手机上会锁死audio元素）】
+  // prime 仅在需要异步 fallback 定时器的 Web Speech 分支才做（上面短路分支跳过）
   try {
     var a = getSharedTTSAudio();
     if (a && !a._ttsPrimed) {
       a._ttsPrimed = true;
       try {
+        a.src = _SILENT_MP3;
         var primePromise = a.play();
         if (primePromise && typeof primePromise.then === 'function') {
           primePromise.then(function(){ try { a.pause(); } catch(e){} }).catch(function(){});
@@ -569,13 +603,6 @@ function doSpeak(text, isEnglish, onend) {
       } catch(e) {}
     }
   } catch(e) {}
-
-  // 【关键修复：用户反馈手机端中文没声音】
-  // 手机上中文 Web Speech 经常"onstart 触发但实际不发声"→永远不进入 fallback。
-  // 策略：移动端 && 中文 → 直接强制使用有道在线 TTS type=1（英语保持不变，按用户要求不用改）
-  if (!isEnglish && isMobileDevice()) {
-    return speakWithOnlineTTS(text, false, onend);
-  }
 
   if (hasWebSpeech) {
     try {
