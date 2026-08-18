@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>容容一年级学习平台4</title>
+<title>容容一年级学习平台5</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -1898,29 +1898,94 @@ function playReadSounds() {
   setTimeout(function() { playTone(1000, 0.2, 0.35); }, 360);
 }
 
+// 共享 TTS audio 元素：在用户手势栈内 play 一次就拿到 autoplay 永久授权，后续 setTimeout 再 play 不会被阻止
+var _sharedTTSAudio = null;
+function getSharedTTSAudio() {
+  if (!_sharedTTSAudio) {
+    try {
+      _sharedTTSAudio = new Audio();
+      _sharedTTSAudio.id = '_ttsAudio';
+      _sharedTTSAudio.style.display = 'none';
+      _sharedTTSAudio.preload = 'auto';
+      document.body.appendChild(_sharedTTSAudio);
+    } catch(e) { return null; }
+  }
+  return _sharedTTSAudio;
+}
+
 // 在线TTS：用有道词典发音API，通过<audio>播放（所有手机浏览器都支持）
-function speakWithOnlineTTS(text, isEnglish) {
+function speakWithOnlineTTS(text, isEnglish, onend) {
   try {
     var encoded = encodeURIComponent(text);
     var url = isEnglish
       ? 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=2'
       : 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=1';
-    var oldAudio = document.getElementById('_ttsAudio');
-    if (oldAudio) { try { oldAudio.pause(); } catch(e) {} oldAudio.remove(); }
-    var audio = new Audio(url);
-    audio.id = '_ttsAudio';
-    audio.style.display = 'none';
-    audio.onerror = function() { console.warn('Online TTS failed:', url); };
-    document.body.appendChild(audio);
-    var p = audio.play();
-    if (p && typeof p.then === 'function') p.catch(function(e) { console.warn('Audio play blocked:', e); });
+    var audio = getSharedTTSAudio();
+    if (!audio) { if (onend) onend(); return false; }
+    try { audio.pause(); } catch(e) {}
+
+    var endedOnce = false;
+    function done() {
+      if (endedOnce) return;
+      endedOnce = true;
+      audio.onended = null;
+      audio.onerror = null;
+      if (onend) onend();
+    }
+    audio.onended = done;
+    audio.onerror = function(e) { console.warn('Online TTS failed:', url); done(); };
+    audio.src = url;
+    try {
+      var p = audio.play();
+      if (p && typeof p.then === 'function') {
+        p.then(function(){}).catch(function(e) {
+          console.warn('Audio play blocked:', e);
+          done();
+        });
+      }
+    } catch(e2) { done(); }
     return true;
-  } catch(e) { return false; }
+  } catch(e) { if (onend) onend(); return false; }
+}
+
+// 检测是否为移动端：移动端的中文 Web Speech 经常"触发 onstart 但实际静默"，强制走在线 TTS
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod|Mobile|HarmonyOS|XiaoMi|HUAWEI|MQQBrowser|UCBrowser/i.test(navigator.userAgent || '');
+}
+
+// 估算中文朗读最少需要的毫秒数（<40% 说明是空播放假阳性）
+function estimateChineseMinMs(text) {
+  if (!text) return 0;
+  var zhChars = (text.match(/[\u4e00-\u9fa5，。？！、；：""''（）《》…—]/g) || []).length;
+  var enWords = (text.replace(/[\u4e00-\u9fa5]/g, ' ').match(/[a-zA-Z]{2,}/g) || []).length;
+  return Math.max(800, zhChars * 250 + enWords * 400);
 }
 
 // 真正执行朗读的内部函数（必须同步调用，在用户手势上下文中执行）
-function doSpeak(text, isEnglish) {
+function doSpeak(text, isEnglish, onend) {
   var hasWebSpeech = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
+
+  // 在手势栈内先"占坑"共享audio：做一次 play→pause，拿到 autoplay 授权（后续异步再 play 不会被阻止）
+  try {
+    var a = getSharedTTSAudio();
+    if (a && !a._ttsPrimed) {
+      a._ttsPrimed = true;
+      try {
+        var primePromise = a.play();
+        if (primePromise && typeof primePromise.then === 'function') {
+          primePromise.then(function(){ try { a.pause(); } catch(e){} }).catch(function(){});
+        } else {
+          try { a.pause(); } catch(e) {}
+        }
+      } catch(e) {}
+    }
+  } catch(e) {}
+
+  // 【关键修复：手机端中文无朗读声 → 移动端+中文强制走有道在线 TTS】
+  // 英语按用户要求不改动，走原有链路。中文 Web Speech 在移动端 onstart 常假阳性不真正发声。
+  if (!isEnglish && isMobileDevice()) {
+    return speakWithOnlineTTS(text, false, onend);
+  }
 
   if (hasWebSpeech) {
     try {
@@ -1928,52 +1993,72 @@ function doSpeak(text, isEnglish) {
       try { window.speechSynthesis.resume(); } catch(e) {}
 
       var u = new SpeechSynthesisUtterance(text);
-      var voice;
-      if (isEnglish) {
-        voice = pickEnglishVoice();
-        u.lang = voice ? (voice.lang || 'en-US') : 'en-US';
-        u.rate = 0.85;
-      } else {
-        voice = pickChineseVoice();
-        u.lang = voice ? (voice.lang || 'zh-CN') : 'zh-CN';
-        u.rate = 0.9;
-      }
-      if (voice) { try { u.voice = voice; } catch(e) {} }
+      var voice = isEnglish ? pickEnglishVoice() : pickChineseVoice();
+      u.lang = voice ? (voice.lang || (isEnglish ? 'en-US' : 'zh-CN')) : (isEnglish ? 'en-US' : 'zh-CN');
+      u.rate = isEnglish ? 0.85 : 0.9;
       u.pitch = 1;
       u.volume = 1;
+      if (voice) { try { u.voice = voice; } catch(e) {} }
 
       var started = false;
       var fbTimer = null;
-      u.onstart = function() { started = true; if (fbTimer) clearTimeout(fbTimer); };
-      u.onend = function() { if (fbTimer) clearTimeout(fbTimer); };
+      var _onend = onend;
+      var startedAt = 0;
+      var minExpectedMs = !isEnglish ? estimateChineseMinMs(text) : 300;
+      var fallbackDone = false;
+
+      u.onstart = function() {
+        started = true;
+        startedAt = Date.now();
+        if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
+      };
+      u.onend = function() {
+        if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
+        // 兜底：中文 onend 比预估时间短40%就判定是空播放假阳性，在线 TTS 补上
+        if (!fallbackDone && started && !isEnglish && startedAt > 0) {
+          var elapsed = Date.now() - startedAt;
+          if (elapsed < minExpectedMs * 0.4) {
+            fallbackDone = true;
+            try { window.speechSynthesis.cancel(); } catch(e) {}
+            speakWithOnlineTTS(text, false, _onend);
+            return;
+          }
+        }
+        if (_onend) _onend();
+      };
       u.onerror = function(e) {
-        if (fbTimer) clearTimeout(fbTimer);
+        if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
         console.warn('TTS error, fallback to online:', e);
-        speakWithOnlineTTS(text, isEnglish);
+        fallbackDone = true;
+        speakWithOnlineTTS(text, isEnglish, _onend);
       };
       window.speechSynthesis.speak(u);
 
-      // 1.2秒后如果onstart没触发，说明Web Speech不工作（手机常见），fallback到在线TTS
+      // 1.2秒后如果onstart没触发，说明Web Speech不工作（手机常见），fallback到在线TTS（复用已授权audio）
       fbTimer = setTimeout(function() {
+        fbTimer = null;
         if (!started) {
           try { window.speechSynthesis.cancel(); } catch(e) {}
-          speakWithOnlineTTS(text, isEnglish);
+          fallbackDone = true;
+          speakWithOnlineTTS(text, isEnglish, onend);
         }
       }, 1200);
       return true;
     } catch(e) {
-      return speakWithOnlineTTS(text, isEnglish);
+      return speakWithOnlineTTS(text, isEnglish, onend);
     }
   }
 
   // Web Speech API 完全不可用（手机常见），直接用在线TTS
-  return speakWithOnlineTTS(text, isEnglish);
+  return speakWithOnlineTTS(text, isEnglish, onend);
 }
 
 function speakText(text) {
   if (!text) return;
   var isEnglish = !/[\u4e00-\u9fa5]/.test(text);
 
+  // 关键：必须同步调 doSpeak（用户手势栈内），绝不做任何 setInterval 延后调用再朗读
+  loadTTSVoices();
   var spoken = doSpeak(text, isEnglish);
 
   // 提示音延迟 200ms：让朗读先"抢占"音频通道
