@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材</title>
+<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材5</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -536,6 +536,20 @@ function speakWithOnlineTTS(text, isEnglish, onend) {
   } catch(e) { if (onend) onend(); return false; }
 }
 
+// 检测是否为移动端（手机/平板）：移动端的中文 Web Speech 经常"触发 onstart 但静默"的假阳性，所以强制走在线 TTS
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod|Mobile|HarmonyOS|XiaoMi|HUAWEI|MQQBrowser|UCBrowser/i.test(navigator.userAgent || '');
+}
+
+// 估算中文文本按正常语速朗读需要的最少毫秒数（3字/秒是小朋友语速下限，比这快很多肯定是空播放假阳性）
+function estimateChineseMinMs(text) {
+  if (!text) return 0;
+  // 中文字符（含标点）数 × 250ms/字，最少 800ms，英文单词按每词 400ms
+  var zhChars = (text.match(/[\u4e00-\u9fa5，。？！、；：""''（）《》…—]/g) || []).length;
+  var enWords = (text.replace(/[\u4e00-\u9fa5]/g, ' ').match(/[a-zA-Z]{2,}/g) || []).length;
+  return Math.max(800, zhChars * 250 + enWords * 400);
+}
+
 // ---------- 核心朗读函数（必须在用户手势同步调用栈中执行；内部 1.2s fallback 必须复用已授权的共享 audio） ----------
 function doSpeak(text, isEnglish, onend) {
   var hasWebSpeech = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
@@ -556,6 +570,13 @@ function doSpeak(text, isEnglish, onend) {
     }
   } catch(e) {}
 
+  // 【关键修复：用户反馈手机端中文没声音】
+  // 手机上中文 Web Speech 经常"onstart 触发但实际不发声"→永远不进入 fallback。
+  // 策略：移动端 && 中文 → 直接强制使用有道在线 TTS type=1（英语保持不变，按用户要求不用改）
+  if (!isEnglish && isMobileDevice()) {
+    return speakWithOnlineTTS(text, false, onend);
+  }
+
   if (hasWebSpeech) {
     try {
       try { window.speechSynthesis.cancel(); } catch(e) {}
@@ -572,11 +593,33 @@ function doSpeak(text, isEnglish, onend) {
       var started = false;
       var fbTimer = null;
       var _onend = onend;
-      u.onstart = function() { started = true; if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; } };
-      u.onend = function() { if (fbTimer) clearTimeout(fbTimer); if (_onend) _onend(); };
+      var startedAt = 0;
+      var minExpectedMs = !isEnglish ? estimateChineseMinMs(text) : 300;
+      var fallbackDone = false;
+
+      u.onstart = function() {
+        started = true;
+        startedAt = Date.now();
+        if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
+      };
+      u.onend = function() {
+        if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
+        // 兜底：中文 onend 比预估时间快很多（< 40%）就判定是空播放假阳性，立即 fallback 在线 TTS
+        if (!fallbackDone && started && !isEnglish && startedAt > 0) {
+          var elapsed = Date.now() - startedAt;
+          if (elapsed < minExpectedMs * 0.4) {
+            fallbackDone = true;
+            try { window.speechSynthesis.cancel(); } catch(e) {}
+            speakWithOnlineTTS(text, false, _onend);
+            return;
+          }
+        }
+        if (_onend) _onend();
+      };
       u.onerror = function(e) {
         if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
         console.warn('Web Speech error, fallback to online TTS:', e && e.error);
+        fallbackDone = true;
         speakWithOnlineTTS(text, isEnglish, _onend);
       };
       window.speechSynthesis.speak(u);
@@ -586,6 +629,7 @@ function doSpeak(text, isEnglish, onend) {
         fbTimer = null;
         if (!started) {
           try { window.speechSynthesis.cancel(); } catch(e) {}
+          fallbackDone = true;
           speakWithOnlineTTS(text, isEnglish, onend);
         }
       }, 1200);
