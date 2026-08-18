@@ -734,7 +734,7 @@ body {
 
 <!-- 左侧导航 -->
 <div class="sidebar">
-  <div class="logo">🌟 小豆包</div>
+  <div class="logo">🌟 小豆包1</div>
   <div class="logo-sub">一年级学习工作台</div>
   <div class="nav-item active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span><span>首页</span></div>
   <div class="nav-item" onclick="showPage('chinese', this)"><span class="nav-icon">📖</span><span>语文天地</span></div>
@@ -1764,13 +1764,51 @@ function updateHomeStats() {
 }
 
 // =================== 朗读 ===================
+let _voicesLoaded = false;
+let _voicesList = [];
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  _voicesList = speechSynthesis.getVoices() || [];
+  if (_voicesList.length > 0) _voicesLoaded = true;
+}
+if ('speechSynthesis' in window) {
+  loadVoices();
+  // Chrome 需要监听 voiceschanged 事件
+  if (typeof speechSynthesis.onvoiceschanged !== 'undefined') {
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
+
 function speakText(text) {
-  if ('speechSynthesis' in window) {
+  if (!('speechSynthesis' in window)) {
+    toast('当前浏览器不支持语音朗读');
+    return;
+  }
+  try {
     speechSynthesis.cancel();
+    // 等待声音列表加载
+    if (!_voicesLoaded) loadVoices();
     let u = new SpeechSynthesisUtterance(text);
     u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-CN' : 'en-US';
     u.rate = 0.8;
+    u.pitch = 1;
+    u.volume = 1;
+    // 找一个匹配语言的中文/英文声音
+    if (_voicesList.length > 0) {
+      const langPrefix = u.lang.slice(0,2);
+      const matched = _voicesList.find(v => v.lang && v.lang.startsWith(langPrefix));
+      if (matched) u.voice = matched;
+    }
+    u.onerror = (e) => {
+      console.warn('朗读出错:', e);
+      toast('朗读失败，请重试或检查浏览器设置');
+    };
     speechSynthesis.speak(u);
+    // 部分浏览器需要 resume 唤醒
+    setTimeout(() => { if (speechSynthesis.paused) speechSynthesis.resume(); }, 100);
+  } catch (err) {
+    console.error(err);
+    toast('朗读功能异常');
   }
 }
 
@@ -1790,42 +1828,4 @@ const quotes = [
   '读书破万卷，下笔如有神。📚',
   '少壮不努力，老大徒伤悲。⏰',
   '书山有路勤为径，学海无涯苦作舟。🚣',
-  '好好学习，天天向上！📈',
-  '一分耕耘，一分收获。🌾',
-  '只要功夫深，铁杵磨成针。🔨',
-  '失败是成功之母，加油！💪',
-  '知识就是力量！💡'
-];
-
-// =================== 初始化 ===================
-function init() {
-  let d = new Date();
-  let week = ['日','一','二','三','四','五','六'];
-  document.getElementById('todayDate').textContent = 
-    '📅 '+d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+week[d.getDay()];
-  document.getElementById('dailyQuote').textContent = quotes[getDailyIndex(quotes.length)];
-  
-  showPoem();
-  showIdiom();
-  showNewChars();
-  genPinyinPractice();
-  showStory();
-  genMath();
-  showErrorBook();
-  genNumberSense();
-  genLogic();
-  showEnglish();
-  showExercise();
-  renderCheckin();
-  renderRewards();
-  updateScoreDisplay();
-  updateHomeStats();
-}
-init();
-
-window.onscroll = function() {
-  document.getElementById('scrollTop').style.display = window.scrollY > 300 ? 'flex' : 'none';
-};
-</script>
-</body>
-</html>
+  '好好学习
