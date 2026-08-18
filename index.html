@@ -1223,12 +1223,12 @@ function genMath() {
     let m = methods[getDailyIndex(methods.length) + i % methods.length];
     let q = {};
     if (m === '凑十法') {
-      // 凑十法：a+b，a接近10
+      // 凑十法: a+b, a接近10
       let a = 8 + Math.floor(Math.random()*3); // 8,9,10
       let b = 1 + Math.floor(Math.random()*9);
       q = {formula: a+' + '+b+' = ', ans: a+b, method:'凑十法'};
     } else if (m === '破十法') {
-      // 破十法：十几减几
+      // 破十法: 十几减几
       let a = 10 + Math.floor(Math.random()*9);
       let b = 1 + Math.floor(Math.random()*9);
       if (b >= a) b = a - 1;
@@ -1402,7 +1402,7 @@ const enWordsData = [
   [{w:'apple',p:'ˈæpl',m:'苹果',i:'🍎'},{w:'banana',p:'bəˈnænə',m:'香蕉',i:'🍌'},{w:'cat',p:'kæt',m:'猫',i:'🐱'},{w:'dog',p:'dɔɡ',m:'狗',i:'🐶'},{w:'egg',p:'eɡ',m:'鸡蛋',i:'🥚'},{w:'fish',p:'fɪʃ',m:'鱼',i:'🐟'},{w:'grape',p:'ɡreɪp',m:'葡萄',i:'🍇'},{w:'hand',p:'hænd',m:'手',i:'✋'},{w:'ice',p:'aɪs',m:'冰',i:'🧊'},{w:'juice',p:'dʒuːs',m:'果汁',i:'🧃'}],
   [{w:'kite',p:'kaɪt',m:'风筝',i:'🪁'},{w:'lion',p:'ˈlaɪən',m:'狮子',i:'🦁'},{w:'moon',p:'muːn',m:'月亮',i:'🌙'},{w:'nose',p:'nəʊz',m:'鼻子',i:'👃'},{w:'orange',p:'ˈɒrɪndʒ',m:'橙子',i:'🍊'},{w:'pig',p:'pɪɡ',m:'猪',i:'🐷'},{w:'queen',p:'kwiːn',m:'女王',i:'👸'},{w:'rabbit',p:'ˈræbɪt',m:'兔子',i:'🐰'},{w:'sun',p:'sʌn',m:'太阳',i:'☀️'},{w:'tree',p:'triː',m:'树',i:'🌳'}],
   [{w:'umbrella',p:'ʌmˈbrelə',m:'雨伞',i:'☂️'},{w:'violin',p:'ˌvaɪəˈlɪn',m:'小提琴',i:'🎻'},{w:'water',p:'ˈwɔːtə',m:'水',i:'💧'},{w:'box',p:'bɒks',m:'盒子',i:'📦'},{w:'yellow',p:'ˈjeləʊ',m:'黄色',i:'🟡'},{w:'zoo',p:'zuː',m:'动物园',i:'🦁'},{w:'book',p:'bʊk',m:'书',i:'📖'},{w:'car',p:'kɑː',m:'汽车',i:'🚗'},{w:'duck',p:'dʌk',m:'鸭子',i:'🦆'},{w:'eye',p:'aɪ',m:'眼睛',i:'👁️'}],
-  [{w:'father',p:'ˈfɑːðə',m:'爸爸',i:'👨'},{w:'mother',p:'ˈmʌðə',m:'妈妈',i:'👩'},{w:'brother',p:'ˈbrʌðə',m:'哥哥',i:'👦'},{w:'sister',p:'ˈsɪstə',m:'姐姐',i:'👧'},{w:'teacher',p:'ˈtiːtʃə',m:'老师',i:'👩‍🏫'},{w:'friend',p:'frend',m:'朋友',i:'🤝'},{w:'school',p:'skuːl',m:'学校',i:'🏫'},{w:'home',p:'həʊm',m:'家',i:'🏠'},{w:'milk',p:'mɪlk',m:'牛奶',i:'🥛'},{w:'bread',p:'bred',m:'面包',i:'🍞'}]
+  [{w:'father',p:'ˈfɑːðə',m:'爸爸',i:'👨'},{w:'mother',p:'ˈmʌðə',m:'妈妈',i:'👩'},{w:'brother',p:'ˈbrʌðə',m:'哥哥',i:'👦'},{w:'sister',p:'ˈsɪstə',m:'姐姐',i:'👧'},{w:'teacher',p:'ˈtiːtʃə',m:'老师',i:'👩🏫'},{w:'friend',p:'frend',m:'朋友',i:'🤝'},{w:'school',p:'skuːl',m:'学校',i:'🏫'},{w:'home',p:'həʊm',m:'家',i:'🏠'},{w:'milk',p:'mɪlk',m:'牛奶',i:'🥛'},{w:'bread',p:'bred',m:'面包',i:'🍞'}]
 ];
 function showEnglish() {
   let sArr = enSentencesData[getDailyIndex(enSentencesData.length)];
@@ -1766,110 +1766,70 @@ function updateHomeStats() {
 }
 
 // =================== 朗读 ===================
-var _voices = [];
-var _voicesReady = false;
-var _beepAudio = null; // 用于播放提示音的 audio 元素
+var _audioCtx = null;
+var _audioCtxReady = false;
 
-// 初始化声音列表（页面加载时执行）
-function initVoices() {
+// 获取/创建 AudioContext（首次用户点击后才能创建）
+function getAudioCtx() {
+  if (_audioCtx) {
+    if (_audioCtx.state === 'suspended') {
+      try { _audioCtx.resume(); } catch(e) {}
+    }
+    return _audioCtx;
+  }
   try {
-    if (typeof window.speechSynthesis === 'undefined' || !window.speechSynthesis) return;
-    _voices = window.speechSynthesis.getVoices() || [];
-    if (_voices.length > 0) _voicesReady = true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) {
+      _audioCtx = new AC();
+      _audioCtxReady = true;
+    }
   } catch(e) {}
+  return _audioCtx;
 }
 
-// 监听声音变化
-if (typeof window !== 'undefined' && window.speechSynthesis) {
-  initVoices();
-  if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
-    window.speechSynthesis.onvoiceschanged = initVoices;
-  }
-}
-
-// 生成 WAV 格式的提示音 data URI（所有浏览器都支持）
-function getBeepDataUri(frequency, duration) {
-  frequency = frequency || 800;
-  duration = duration || 0.3;
-  var sampleRate = 8000;
-  var numSamples = Math.floor(sampleRate * duration);
-  
-  // 创建 WAV 文件的二进制数据
-  var buffer = new ArrayBuffer(44 + numSamples * 2);
-  var view = new DataView(buffer);
-  
-  // 写入字符串的辅助函数
-  function writeString(offset, str) {
-    for (var i = 0; i < str.length; i++) {
-      view.setUint8(offset + i, str.charCodeAt(i));
-    }
-  }
-  
-  // RIFF 头
-  writeString(0, 'RIFF');
-  view.setUint32(4, 36 + numSamples * 2, true);
-  writeString(8, 'WAVE');
-  
-  // fmt 子块
-  writeString(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, 1, true); // 单声道
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true); // 16位
-  
-  // data 子块
-  writeString(36, 'data');
-  view.setUint32(40, numSamples * 2, true);
-  
-  // 写入音频数据（正弦波，带淡入淡出）
-  for (var i = 0; i < numSamples; i++) {
-    var t = i / sampleRate;
-    var envelope = 1;
-    if (i < numSamples * 0.1) envelope = i / (numSamples * 0.1); // 淡入
-    if (i > numSamples * 0.9) envelope = (numSamples - i) / (numSamples * 0.1); // 淡出
-    var amplitude = 0.3 * 32767 * envelope;
-    var value = Math.floor(amplitude * Math.sin(2 * Math.PI * frequency * t));
-    view.setInt16(44 + i * 2, value, true);
-  }
-  
-  // 转换为 base64
-  var binary = '';
-  var bytes = new Uint8Array(buffer);
-  for (var j = 0; j < bytes.length; j++) {
-    binary += String.fromCharCode(bytes[j]);
-  }
-  return 'data:audio/wav;base64,' + btoa(binary);
-}
-
-// 播放提示音（使用 audio 元素，兼容性最好）
-function playBeep(freq) {
+// 播放一个音符（Web Audio API 方式，兼容所有浏览器）
+function playTone(freq, duration, vol) {
+  vol = vol || 0.3;
   try {
-    if (!_beepAudio) {
-      _beepAudio = new Audio();
-    }
-    _beepAudio.src = getBeepDataUri(freq || 800, 0.2);
-    _beepAudio.volume = 1;
-    _beepAudio.play().catch(function(e) {
-      console.warn('提示音播放失败:', e);
-    });
+    var ctx = getAudioCtx();
+    if (!ctx) return;
+    
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.type = 'sine';
+    
+    // 淡入淡出，避免爆音
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
   } catch(e) {
-    console.warn('playBeep error:', e);
+    console.warn('playTone error:', e);
   }
 }
 
-// 播放连续提示音（模拟朗读节奏）
+// 播放"叮"声
+function playBeep(freq) {
+  playTone(freq || 800, 0.15, 0.3);
+}
+
+// 播放朗读节奏的提示音
 function playReadSounds() {
-  playBeep(800);
-  setTimeout(function() { playBeep(600); }, 200);
-  setTimeout(function() { playBeep(700); }, 400);
-  setTimeout(function() { playBeep(900); }, 600);
+  // 4声不同频率的"叮"，模拟朗读节奏
+  playTone(698, 0.12, 0.25);  // F5
+  setTimeout(function() { playTone(587, 0.12, 0.25); }, 150); // D5
+  setTimeout(function() { playTone(523, 0.12, 0.25); }, 300); // C5
+  setTimeout(function() { playTone(659, 0.18, 0.25); }, 450); // E5
 }
 
 function speakText(text) {
-  // 方式1: Web Speech API（如果可用）
+  // 先尝试 Web Speech API
   var spoken = false;
   try {
     if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
@@ -1880,27 +1840,13 @@ function speakText(text) {
       u.rate = 0.85;
       u.pitch = 1;
       u.volume = 1;
-      
-      // 尝试匹配声音
-      if (_voices.length === 0) initVoices();
-      if (_voices.length > 0) {
-        var langPrefix = u.lang.slice(0, 2);
-        for (var i = 0; i < _voices.length; i++) {
-          if (_voices[i].lang && _voices[i].lang.indexOf(langPrefix) === 0) {
-            u.voice = _voices[i];
-            break;
-          }
-        }
-      }
       u.onerror = function() {};
       window.speechSynthesis.speak(u);
       spoken = true;
     }
-  } catch(e) {
-    spoken = false;
-  }
+  } catch(e) {}
   
-  // 无论 Web Speech API 是否可用，都播放提示音和显示文字
+  // 播放提示音（所有浏览器都能响）
   playReadSounds();
   showSpeakIndicator(text);
   
@@ -1910,7 +1856,6 @@ function speakText(text) {
 }
 
 function showSpeakIndicator(text) {
-  // 显示朗读中的视觉提示
   var el = document.createElement('div');
   el.style.cssText = 'position:fixed;top:10px;right:10px;background:#4a9eff;color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
   el.textContent = '🔊 ' + text.substring(0, 40) + (text.length > 40 ? '...' : '');
@@ -1920,25 +1865,23 @@ function showSpeakIndicator(text) {
 
 // 测试语音功能
 function testSpeech() {
-  var testText = '你好，这是语音测试。';
   var hasSynthesis = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
-  var voices = [];
-  try { voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; } catch(e) {}
+  var hasAudioCtx = !!(window.AudioContext || window.webkitAudioContext);
   
-  var info = '语音环境检测：\n';
+  var info = '语音环境检测：\n\n';
+  info += 'Web Audio API：' + (hasAudioCtx ? '✅ 可用' : '❌ 不可用') + '\n';
   info += 'Web Speech API：' + (hasSynthesis ? '✅ 可用' : '❌ 不可用') + '\n';
-  info += '可用声音数：' + voices.length + '\n';
-  info += '浏览器：' + navigator.userAgent.substring(0, 50) + '\n\n';
-  info += '点击确定后将播放提示音测试...';
+  info += '浏览器：' + navigator.userAgent.substring(0, 60) + '\n\n';
+  info += '点击确定后将播放3声"叮"测试...';
   
   alert(info);
-  // 播放提示音测试
-  playBeep(800);
-  setTimeout(function() { playBeep(600); }, 300);
-  setTimeout(function() { playBeep(1000); }, 600);
   
-  // 显示文字提示
-  showSpeakIndicator(testText);
+  // 播放3声测试
+  playTone(698, 0.15, 0.3);
+  setTimeout(function() { playTone(587, 0.15, 0.3); }, 250);
+  setTimeout(function() { playTone(880, 0.2, 0.3); }, 500);
+  
+  showSpeakIndicator('语音测试成功');
 }
 
 // =================== 提示 ===================
