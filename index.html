@@ -1898,7 +1898,7 @@ function playReadSounds() {
   setTimeout(function() { playTone(1000, 0.2, 0.35); }, 360);
 }
 
-// 真正执行朗读的内部函数
+// 真正执行朗读的内部函数（必须同步调用，在用户手势上下文中执行 speak）
 function doSpeak(text, isEnglish) {
   try {
     if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return false;
@@ -1910,22 +1910,20 @@ function doSpeak(text, isEnglish) {
     if (isEnglish) {
       voice = pickEnglishVoice();
       u.lang = voice ? (voice.lang || 'en-US') : 'en-US';
-      u.rate = 0.9;
+      u.rate = 0.85;
     } else {
       voice = pickChineseVoice();
       u.lang = voice ? (voice.lang || 'zh-CN') : 'zh-CN';
       u.rate = 0.9;
     }
-    // 【修复英语不发声的核心】显式给 utterance 指定 voice。
-    // Windows 下不指定 voice，只设置 u.lang='en-US'，但系统没装英文语音时，会静默丢弃不播放。
-    // 指定 voice 后，哪怕 voice 是中文的，TTS 引擎也会用中文口音去读英语单词，至少有声音。
     if (voice) {
       try { u.voice = voice; } catch(e) {}
-      if (!u.lang && voice.lang) u.lang = voice.lang;
     }
     u.pitch = 1;
     u.volume = 1;
-    u.onerror = function() {};
+    u.onstart = function() {};
+    u.onend = function() {};
+    u.onerror = function(e) { console.warn('TTS error:', e); };
     window.speechSynthesis.speak(u);
     return true;
   } catch(e) {
@@ -1936,28 +1934,33 @@ function doSpeak(text, isEnglish) {
 function speakText(text) {
   if (!text) return;
   var isEnglish = !/[\u4e00-\u9fa5]/.test(text);
-  var spoken = false;
 
+  // speak() 必须在用户点击的同步调用栈中执行（浏览器安全策略要求）
+  // 否则 setTimeout 会导致脱离用户手势上下文，speech 被静默阻止
+  var spoken = false;
   if (!_ttsVoicesLoaded && window.speechSynthesis) {
-    // voices还没加载完（Windows常见情况）：做最多2秒轮询，保证朗读不静默
-    var tries = 0;
-    var iv = setInterval(function() {
-      tries++;
-      loadTTSVoices();
-      if (_ttsVoices.length > 0 || tries > 8) {
-        clearInterval(iv);
-        spoken = doSpeak(text, isEnglish);
-        if (!spoken) {
-          toast('🔊 正在朗读：' + text.substring(0, 30) + (text.length > 30 ? '...' : ''));
+    // voices未加载：同步尝试一次，再异步轮询
+    loadTTSVoices();
+    if (_ttsVoices.length > 0) {
+      spoken = doSpeak(text, isEnglish);
+    } else {
+      var tries = 0;
+      var iv = setInterval(function() {
+        tries++;
+        loadTTSVoices();
+        if (_ttsVoices.length > 0 || tries > 8) {
+          clearInterval(iv);
+          doSpeak(text, isEnglish);
         }
-      }
-    }, 250);
+      }, 250);
+    }
   } else {
     spoken = doSpeak(text, isEnglish);
   }
 
-  // 播放提示音（所有浏览器都能响，作为朗读信号）
-  playReadSounds();
+  // 提示音延迟 200ms 播放：让 speechSynthesis 先"抢占"音频通道开始播放
+  // 英文单词很短，如果不延迟，AudioContext 会抢占输出导致英文来不及发声
+  setTimeout(function() { playReadSounds(); }, 200);
   showSpeakIndicator(text);
 
   if (!spoken && _ttsVoicesLoaded) {
