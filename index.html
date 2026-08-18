@@ -1767,121 +1767,265 @@ function updateHomeStats() {
 
 // =================== 朗读 ===================
 var _audioCtx = null;
-var _audioCtxReady = false;
+var _ttsVoices = [];
+var _ttsVoicesLoaded = false;
+var _ttsVoicesBound = false;
 
-// 获取/创建 AudioContext（首次用户点击后才能创建）
-function getAudioCtx() {
-  if (_audioCtx) {
-    if (_audioCtx.state === 'suspended') {
-      try { _audioCtx.resume(); } catch(e) {}
-    }
-    return _audioCtx;
-  }
+// ---------- TTS 语音列表管理（解决Windows下英语语音为空的核心修复） ----------
+function loadTTSVoices() {
   try {
-    var AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) {
-      _audioCtx = new AC();
-      _audioCtxReady = true;
+    if (!window.speechSynthesis) return;
+    var list = window.speechSynthesis.getVoices() || [];
+    if (list && list.length) {
+      _ttsVoices = Array.prototype.slice.call(list);
+      _ttsVoicesLoaded = true;
     }
   } catch(e) {}
-  return _audioCtx;
+}
+function bindTTSVoicesEvent() {
+  if (_ttsVoicesBound) return;
+  _ttsVoicesBound = true;
+  try {
+    if (!window.speechSynthesis) return;
+    // Chrome/Edge在Windows上需要onvoiceschanged触发后getVoices才不为空
+    if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+      window.speechSynthesis.addEventListener('voiceschanged', function() {
+        loadTTSVoices();
+      });
+    }
+  } catch(e) {}
+  // 立即尝试一次，并做3次轮询兜底
+  loadTTSVoices();
+  var tries = 0;
+  var iv = setInterval(function() {
+    tries++;
+    loadTTSVoices();
+    if (_ttsVoicesLoaded || tries > 5) clearInterval(iv);
+  }, 400);
+}
+bindTTSVoicesEvent();
+
+// 为英语/中文挑最合适的TTS语音（关键：显式设置u.voice，Windows下不设置会静默）
+function pickEnglishVoice() {
+  if (!_ttsVoices.length) loadTTSVoices();
+  if (!_ttsVoices.length) return null;
+  var vs = _ttsVoices;
+  // 优先找 en-US 英语，其次 en-GB，其次任何 en*，最后退化到第一个可用的语音（哪怕是中文语音读英语也比没声好）
+  return vs.filter(function(v){ return v.lang === 'en-US' || v.lang === 'en_US'; })[0]
+      || vs.filter(function(v){ return v.lang === 'en-GB' || v.lang === 'en_GB'; })[0]
+      || vs.filter(function(v){ return /^en[\-_]/i.test(v.lang) || v.lang.toLowerCase() === 'en'; })[0]
+      || vs.filter(function(v){ return v.default; })[0]
+      || vs[0];
+}
+function pickChineseVoice() {
+  if (!_ttsVoices.length) loadTTSVoices();
+  if (!_ttsVoices.length) return null;
+  var vs = _ttsVoices;
+  return vs.filter(function(v){ return /^zh/i.test(v.lang) || /cmn/i.test(v.lang); })[0]
+      || vs.filter(function(v){ return v.default; })[0]
+      || vs[0];
 }
 
-// 播放一个音符（Web Audio API 方式，兼容所有浏览器）
+// 预热 AudioContext：首次用户任意点击时创建并解锁（浏览器安全策略要求）
+function warmupAudio() {
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!_audioCtx || _audioCtx.state === 'closed') {
+      _audioCtx = new AC();
+    }
+    if (_audioCtx.state === 'suspended') {
+      var p = _audioCtx.resume();
+      if (p && typeof p.then === 'function') p.catch(function(){});
+    }
+  } catch(e) {}
+  // 顺便刷新TTS语音列表（用户手势后，某些浏览器才允许填充voices）
+  loadTTSVoices();
+}
+// 监听用户首次交互，预热音频上下文
+document.addEventListener('click', warmupAudio, { once: false, capture: true });
+document.addEventListener('keydown', warmupAudio, { once: true });
+document.addEventListener('touchstart', warmupAudio, { once: true, passive: true });
+
+// 获取/创建 AudioContext（参照语音测试.html的可靠实现）
+function getAudioCtx() {
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!_audioCtx || _audioCtx.state === 'closed') {
+      _audioCtx = new AC();
+    }
+    if (_audioCtx.state === 'suspended') {
+      var p = _audioCtx.resume();
+      if (p && typeof p.then === 'function') p.catch(function(){});
+    }
+    return _audioCtx;
+  } catch(e) {
+    console.warn('getAudioCtx error:', e);
+    return null;
+  }
+}
+
+// 播放一个音符（参照语音测试.html的成功实现）
 function playTone(freq, duration, vol) {
-  vol = vol || 0.3;
+  vol = vol || 0.35;
+  duration = duration || 0.2;
   try {
     var ctx = getAudioCtx();
     if (!ctx) return;
-    
+    var t = ctx.currentTime;
     var osc = ctx.createOscillator();
     var gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
     osc.type = 'sine';
-    
-    // 淡入淡出，避免爆音
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(vol, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-    
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + duration);
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    osc.start(t);
+    osc.stop(t + duration + 0.02);
+  } catch(e) {}
+}
+
+function playBeep(freq) {
+  playTone(freq || 800, 0.18, 0.35);
+}
+
+function playReadSounds() {
+  playTone(800, 0.15, 0.35);
+  setTimeout(function() { playTone(600, 0.15, 0.35); }, 180);
+  setTimeout(function() { playTone(1000, 0.2, 0.35); }, 360);
+}
+
+// 真正执行朗读的内部函数
+function doSpeak(text, isEnglish) {
+  try {
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return false;
+    try { window.speechSynthesis.cancel(); } catch(e) {}
+    try { window.speechSynthesis.resume(); } catch(e) {}
+
+    var u = new SpeechSynthesisUtterance(text);
+    var voice;
+    if (isEnglish) {
+      voice = pickEnglishVoice();
+      u.lang = voice ? (voice.lang || 'en-US') : 'en-US';
+      u.rate = 0.9;
+    } else {
+      voice = pickChineseVoice();
+      u.lang = voice ? (voice.lang || 'zh-CN') : 'zh-CN';
+      u.rate = 0.9;
+    }
+    // 【修复英语不发声的核心】显式给 utterance 指定 voice。
+    // Windows 下不指定 voice，只设置 u.lang='en-US'，但系统没装英文语音时，会静默丢弃不播放。
+    // 指定 voice 后，哪怕 voice 是中文的，TTS 引擎也会用中文口音去读英语单词，至少有声音。
+    if (voice) {
+      try { u.voice = voice; } catch(e) {}
+      if (!u.lang && voice.lang) u.lang = voice.lang;
+    }
+    u.pitch = 1;
+    u.volume = 1;
+    u.onerror = function() {};
+    window.speechSynthesis.speak(u);
+    return true;
   } catch(e) {
-    console.warn('playTone error:', e);
+    return false;
   }
 }
 
-// 播放"叮"声
-function playBeep(freq) {
-  playTone(freq || 800, 0.15, 0.3);
-}
-
-// 播放朗读节奏的提示音
-function playReadSounds() {
-  // 4声不同频率的"叮"，模拟朗读节奏
-  playTone(698, 0.12, 0.25);  // F5
-  setTimeout(function() { playTone(587, 0.12, 0.25); }, 150); // D5
-  setTimeout(function() { playTone(523, 0.12, 0.25); }, 300); // C5
-  setTimeout(function() { playTone(659, 0.18, 0.25); }, 450); // E5
-}
-
 function speakText(text) {
-  // 先尝试 Web Speech API
+  if (!text) return;
+  var isEnglish = !/[\u4e00-\u9fa5]/.test(text);
   var spoken = false;
-  try {
-    if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
-      window.speechSynthesis.cancel();
-      try { window.speechSynthesis.resume(); } catch(e) {}
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-CN' : 'en-US';
-      u.rate = 0.85;
-      u.pitch = 1;
-      u.volume = 1;
-      u.onerror = function() {};
-      window.speechSynthesis.speak(u);
-      spoken = true;
-    }
-  } catch(e) {}
-  
-  // 播放提示音（所有浏览器都能响）
+
+  if (!_ttsVoicesLoaded && window.speechSynthesis) {
+    // voices还没加载完（Windows常见情况）：做最多2秒轮询，保证朗读不静默
+    var tries = 0;
+    var iv = setInterval(function() {
+      tries++;
+      loadTTSVoices();
+      if (_ttsVoices.length > 0 || tries > 8) {
+        clearInterval(iv);
+        spoken = doSpeak(text, isEnglish);
+        if (!spoken) {
+          toast('🔊 正在朗读：' + text.substring(0, 30) + (text.length > 30 ? '...' : ''));
+        }
+      }
+    }, 250);
+  } else {
+    spoken = doSpeak(text, isEnglish);
+  }
+
+  // 播放提示音（所有浏览器都能响，作为朗读信号）
   playReadSounds();
   showSpeakIndicator(text);
-  
-  if (!spoken) {
+
+  if (!spoken && _ttsVoicesLoaded) {
     toast('🔊 正在朗读：' + text.substring(0, 30) + (text.length > 30 ? '...' : ''));
   }
 }
 
 function showSpeakIndicator(text) {
+  var old = document.querySelectorAll('.speak-indicator');
+  for (var i = 0; i < old.length; i++) old[i].remove();
   var el = document.createElement('div');
+  el.className = 'speak-indicator';
   el.style.cssText = 'position:fixed;top:10px;right:10px;background:#4a9eff;color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
   el.textContent = '🔊 ' + text.substring(0, 40) + (text.length > 40 ? '...' : '');
   document.body.appendChild(el);
-  setTimeout(function() { el.remove(); }, 3000);
+  setTimeout(function() { if (el.parentNode) el.remove(); }, 3000);
 }
 
-// 测试语音功能
+// 测试语音功能（同时测试中文+英文朗读，并且显示系统有多少个TTS语音）
 function testSpeech() {
   var hasSynthesis = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
   var hasAudioCtx = !!(window.AudioContext || window.webkitAudioContext);
-  
+  loadTTSVoices();
+  var zhVoice = pickChineseVoice();
+  var enVoice = pickEnglishVoice();
+
   var info = '语音环境检测：\n\n';
   info += 'Web Audio API：' + (hasAudioCtx ? '✅ 可用' : '❌ 不可用') + '\n';
   info += 'Web Speech API：' + (hasSynthesis ? '✅ 可用' : '❌ 不可用') + '\n';
-  info += '浏览器：' + navigator.userAgent.substring(0, 60) + '\n\n';
-  info += '点击确定后将播放3声"叮"测试...';
-  
+  info += 'TTS 语音总数：' + _ttsVoices.length + ' 个\n';
+  if (_ttsVoices.length) {
+    info += '  中文语音：' + (zhVoice ? '✅ ' + zhVoice.name + ' (' + zhVoice.lang + ')' : '❌ 未找到') + '\n';
+    info += '  英文语音：' + (enVoice ? '✅ ' + enVoice.name + ' (' + enVoice.lang + ')' : '⚠️ 未找到，将使用中文语音读英语') + '\n';
+  } else {
+    info += '  ⚠️ 语音列表仍在加载，确定后会继续播放\n';
+  }
+  info += '浏览器：' + navigator.userAgent.substring(0, 50) + '\n\n';
+  info += '点击【确定】后依次播放：\n  · 3声"叮"提示音\n  · 中文语音朗读\n  · 英文语音朗读';
+
   alert(info);
-  
-  // 播放3声测试
-  playTone(698, 0.15, 0.3);
-  setTimeout(function() { playTone(587, 0.15, 0.3); }, 250);
-  setTimeout(function() { playTone(880, 0.2, 0.3); }, 500);
-  
-  showSpeakIndicator('语音测试成功');
+
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) {
+      if (!_audioCtx || _audioCtx.state === 'closed') _audioCtx = new AC();
+      if (_audioCtx.state === 'suspended') { var pp = _audioCtx.resume(); if (pp && pp.catch) pp.catch(function(){}); }
+    }
+  } catch(e) {}
+
+  // 3声提示音
+  playTone(800, 0.3, 0.35);
+  setTimeout(function() { playTone(600, 0.3, 0.35); }, 400);
+  setTimeout(function() { playTone(1000, 0.4, 0.35); }, 800);
+
+  showSpeakIndicator('语音测试：3声叮 + 中文 + 英文');
+
+  // 1.5秒后朗读中文
+  setTimeout(function() {
+    var ok = doSpeak('你好，小朋友，今天也要加油学习哦！', false);
+    if (!ok) toast('中文朗读失败，请检查系统TTS设置');
+  }, 1500);
+
+  // 5秒后朗读英文（英语天地的核心功能）
+  setTimeout(function() {
+    var ok = doSpeak('Hello! Good morning. Apple, Banana, Cat, Dog. I love you.', true);
+    if (!ok) toast('英文朗读失败，请安装英语语音包');
+    else toast('✅ 如果听到了英语句子，说明英语朗读修复成功！');
+  }, 5000);
 }
 
 // =================== 提示 ===================
