@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材2</title>
+<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -486,6 +486,21 @@ function playReadSounds() {
   setTimeout(function() { playTone(1000, 0.2, 0.35); }, 360);
 }
 
+// ---------- 全局共享的 TTS audio 元素（关键：只在用户手势栈内 play 一次就获得永久授权，后续 setTimeout 再 play 不会被阻止） ----------
+var _sharedTTSAudio = null;
+function getSharedTTSAudio() {
+  if (!_sharedTTSAudio) {
+    try {
+      _sharedTTSAudio = new Audio();
+      _sharedTTSAudio.id = '_ttsAudio';
+      _sharedTTSAudio.style.display = 'none';
+      _sharedTTSAudio.preload = 'auto';
+      document.body.appendChild(_sharedTTSAudio);
+    } catch(e) { return null; }
+  }
+  return _sharedTTSAudio;
+}
+
 // ---------- 在线 TTS fallback（有道词典API，手机浏览器也能用） ----------
 function speakWithOnlineTTS(text, isEnglish, onend) {
   try {
@@ -493,25 +508,53 @@ function speakWithOnlineTTS(text, isEnglish, onend) {
     var url = isEnglish
       ? 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=2'
       : 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=1';
-    var oldAudio = document.getElementById('_ttsAudio');
-    if (oldAudio) { try { oldAudio.pause(); } catch(e) {} oldAudio.remove(); }
-    var audio = new Audio(url);
-    audio.id = '_ttsAudio';
-    audio.style.display = 'none';
-    audio.onerror = function() { if (onend) onend(); };
-    audio.onended = function() { if (onend) onend(); };
-    document.body.appendChild(audio);
-    var p = audio.play();
-    if (p && typeof p.then === 'function') {
-      p.catch(function(e) { console.warn('Audio play blocked:', e); if (onend) onend(); });
+    var audio = getSharedTTSAudio();
+    if (!audio) { if (onend) onend(); return false; }
+    try { audio.pause(); } catch(e) {}
+
+    var endedOnce = false;
+    function done() {
+      if (endedOnce) return;
+      endedOnce = true;
+      audio.onended = null;
+      audio.onerror = null;
+      if (onend) onend();
     }
+    audio.onended = done;
+    audio.onerror = function(e) { console.warn('Online TTS error:', e, url); done(); };
+    audio.src = url;
+    try {
+      var p = audio.play();
+      if (p && typeof p.then === 'function') {
+        p.then(function(){}).catch(function(e) {
+          console.warn('Audio play blocked (try user-gesture scope):', e);
+          done();
+        });
+      }
+    } catch(e2) { console.warn('Audio play exception:', e2); done(); }
     return true;
   } catch(e) { if (onend) onend(); return false; }
 }
 
-// ---------- 核心朗读函数（同步调用，支持 1.2s fallback） ----------
+// ---------- 核心朗读函数（必须在用户手势同步调用栈中执行；内部 1.2s fallback 必须复用已授权的共享 audio） ----------
 function doSpeak(text, isEnglish, onend) {
   var hasWebSpeech = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
+
+  // 先同步"占坑"共享 audio：哪怕不播，也在手势栈里对 audio 元素做一次 play→pause 拿到 autoplay 授权
+  try {
+    var a = getSharedTTSAudio();
+    if (a && !a._ttsPrimed) {
+      a._ttsPrimed = true;
+      try {
+        var primePromise = a.play();
+        if (primePromise && typeof primePromise.then === 'function') {
+          primePromise.then(function(){ try { a.pause(); } catch(e){} }).catch(function(){});
+        } else {
+          try { a.pause(); } catch(e) {}
+        }
+      } catch(e) {}
+    }
+  } catch(e) {}
 
   if (hasWebSpeech) {
     try {
@@ -528,16 +571,19 @@ function doSpeak(text, isEnglish, onend) {
 
       var started = false;
       var fbTimer = null;
-      u.onstart = function() { started = true; if (fbTimer) clearTimeout(fbTimer); };
-      u.onend = function() { if (fbTimer) clearTimeout(fbTimer); if (onend) onend(); };
+      var _onend = onend;
+      u.onstart = function() { started = true; if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; } };
+      u.onend = function() { if (fbTimer) clearTimeout(fbTimer); if (_onend) _onend(); };
       u.onerror = function(e) {
-        if (fbTimer) clearTimeout(fbTimer);
-        console.warn('TTS error, fallback online:', e);
-        speakWithOnlineTTS(text, isEnglish, onend);
+        if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
+        console.warn('Web Speech error, fallback to online TTS:', e && e.error);
+        speakWithOnlineTTS(text, isEnglish, _onend);
       };
       window.speechSynthesis.speak(u);
 
+      // 1.2s 回退：如果 Web Speech 没真正开始（手机、Windows 无语音包常见），切到在线 TTS
       fbTimer = setTimeout(function() {
+        fbTimer = null;
         if (!started) {
           try { window.speechSynthesis.cancel(); } catch(e) {}
           speakWithOnlineTTS(text, isEnglish, onend);
@@ -561,25 +607,10 @@ function speak(text, lang) {
   if (!text) return;
   var isEnglish = langToIsEnglish(lang);
 
-  // 先同步尝试一次 voices，否则兜底用异步（但 doSpeak 本身是同步）
-  if (!_ttsVoicesLoaded && window.speechSynthesis) {
-    loadTTSVoices();
-    if (!_ttsVoices.length) {
-      var tries = 0;
-      var iv = setInterval(function() {
-        tries++;
-        loadTTSVoices();
-        if (_ttsVoices.length > 0 || tries > 8) {
-          clearInterval(iv);
-          doSpeak(text, isEnglish);
-        }
-      }, 250);
-    } else {
-      doSpeak(text, isEnglish);
-    }
-  } else {
-    doSpeak(text, isEnglish);
-  }
+  // 【关键修复】无论 voices 有没有加载好，都必须同步（在用户手势栈内）触发 doSpeak
+  // 禁止进入任何 setInterval/setTimeout 后才调用 doSpeak，否则脱离手势会被浏览器静默
+  loadTTSVoices();
+  doSpeak(text, isEnglish);
 
   setTimeout(function() { playReadSounds(); }, 200);
   showSpeakIndicator(text);
@@ -593,21 +624,14 @@ function speakSeq(items, lang) {
     if (i >= items.length) return;
     var item = items[i++];
     if (!item && item !== 0 && item !== '0') { setTimeout(next, 200); return; }
+    // next() 在第一项时位于用户手势同步栈（第一轮调 speakSeq 就是同步进入），
+    // 后续项靠 doSpeak 的 onend 回调串连，共享 audio 已经在第一轮拿到授权，所以不会被阻止
     doSpeak(String(item), isEnglish, function() { setTimeout(next, 350); });
   }
+  loadTTSVoices();
+  next();
   setTimeout(function() { playReadSounds(); }, 200);
   showSpeakIndicator(items[0]);
-  if (!_ttsVoicesLoaded && window.speechSynthesis) {
-    loadTTSVoices();
-    var tries = 0;
-    var iv = setInterval(function() {
-      tries++;
-      loadTTSVoices();
-      if (_ttsVoices.length > 0 || tries > 8) { clearInterval(iv); next(); }
-    }, 250);
-  } else {
-    next();
-  }
 }
 
 function showSpeakIndicator(text) {
