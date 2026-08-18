@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>容容一年级学习平台5</title>
+<title>容容一年级学习平台4</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -1913,13 +1913,27 @@ function getSharedTTSAudio() {
   return _sharedTTSAudio;
 }
 
-// 在线TTS：用有道词典发音API，通过<audio>播放（所有手机浏览器都支持）
+// 静音 MP3 base64 data-uri（约 0.1 秒无声，用于在手势栈内 prime 拿 autoplay 授权，100% 能成功）
+var _SILENT_MP3 = 'data:audio/mpeg;base64,/+MYxAAAAANIAUAAAASEEB/jwOFM/0MM/90b/+RhST//w4NFwOjf///PZu////9lns5GFDv//l9GlUIEEIAAAgIg8Ir/JGq3/+MYxDsLIj5QMYcoAP0vvlj9VKTf//wWMHAYk9s78/////2gA30cO+0uU////K370wK/5u685rAAB9AADQOaB7dHOL///P/f///3L//5g/5XkP/+MYxBsYgKABwBwJACQAMTAA1gHd2F2ZQBdAGIAYQB2AGkAAAAIAAN/+MYxAYkAAAAAAEgA3AAAv/ufMf9h160b66G89Tj+IAAAAAD/+MYxCYkQAAAAAEgAAAAAAAAAAAAAAAPsAAAD/+MYxDYkAAAAAAEgA3AAAABX+Z+f94U4g797J6t6l1gAD//7sA';
+
+// 在线TTS：中文用百度 gettts（手机中文朗读稳定性更高），英文保持原有道 type=2（用户已验证英语没问题）
+function buildOnlineTTSUrl(text, isEnglish) {
+  var encoded = encodeURIComponent(text);
+  if (isEnglish) {
+    // 英语按用户要求不改动：保持原有道 type=2 美式发音
+    return 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=2';
+  }
+  // 中文：百度翻译 gettts，lan=zh 中文女声 + spd=4 小朋友友好语速
+  return 'https://fanyi.baidu.com/gettts?lan=zh&text=' + encoded + '&spd=4&source=web';
+}
+function buildOnlineTTSUrl_backup(text) {
+  return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=1&le=zh';
+}
+
+// 在线TTS：通过<audio>播放（所有手机浏览器都支持）
 function speakWithOnlineTTS(text, isEnglish, onend) {
   try {
-    var encoded = encodeURIComponent(text);
-    var url = isEnglish
-      ? 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=2'
-      : 'https://dict.youdao.com/dictvoice?audio=' + encoded + '&type=1';
+    var url = buildOnlineTTSUrl(text, isEnglish);
     var audio = getSharedTTSAudio();
     if (!audio) { if (onend) onend(); return false; }
     try { audio.pause(); } catch(e) {}
@@ -1933,7 +1947,20 @@ function speakWithOnlineTTS(text, isEnglish, onend) {
       if (onend) onend();
     }
     audio.onended = done;
-    audio.onerror = function(e) { console.warn('Online TTS failed:', url); done(); };
+    audio.onerror = function(e) {
+      console.warn('Online TTS failed:', url);
+      if (!isEnglish) {
+        try {
+          // 百度失败兜底：有道 type=1+le=zh
+          audio.onerror = done;
+          audio.src = buildOnlineTTSUrl_backup(text);
+          var pp = audio.play();
+          if (pp && pp.catch) pp.catch(function(){ done(); });
+          return;
+        } catch(e2) {}
+      }
+      done();
+    };
     audio.src = url;
     try {
       var p = audio.play();
@@ -1965,12 +1992,20 @@ function estimateChineseMinMs(text) {
 function doSpeak(text, isEnglish, onend) {
   var hasWebSpeech = !!(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
 
-  // 在手势栈内先"占坑"共享audio：做一次 play→pause，拿到 autoplay 授权（后续异步再 play 不会被阻止）
+  // 【关键修复 1：短路直连必须放在 prime 之前】
+  // 移动端+中文：直接同步走在线 TTS（手势栈内 100% 授权），跳过 prime 避免空 src play 竞态锁死 audio
+  if (!isEnglish && isMobileDevice()) {
+    return speakWithOnlineTTS(text, false, onend);
+  }
+
+  // 【关键修复 2：prime 占坑改用静音 data-uri mp3，不再 play 空 src（空src在手机上会锁死audio元素）】
+  // prime 仅在需要异步 fallback 定时器的 Web Speech 分支才做（上面短路分支跳过）
   try {
     var a = getSharedTTSAudio();
     if (a && !a._ttsPrimed) {
       a._ttsPrimed = true;
       try {
+        a.src = _SILENT_MP3;
         var primePromise = a.play();
         if (primePromise && typeof primePromise.then === 'function') {
           primePromise.then(function(){ try { a.pause(); } catch(e){} }).catch(function(){});
@@ -1980,12 +2015,6 @@ function doSpeak(text, isEnglish, onend) {
       } catch(e) {}
     }
   } catch(e) {}
-
-  // 【关键修复：手机端中文无朗读声 → 移动端+中文强制走有道在线 TTS】
-  // 英语按用户要求不改动，走原有链路。中文 Web Speech 在移动端 onstart 常假阳性不真正发声。
-  if (!isEnglish && isMobileDevice()) {
-    return speakWithOnlineTTS(text, false, onend);
-  }
 
   if (hasWebSpeech) {
     try {
