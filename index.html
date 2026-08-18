@@ -734,7 +734,7 @@ body {
 
 <!-- 左侧导航 -->
 <div class="sidebar">
-  <div class="logo">🌟 小豆包1</div>
+  <div class="logo">🌟 小豆包2</div>
   <div class="logo-sub">一年级学习工作台</div>
   <div class="nav-item active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span><span>首页</span></div>
   <div class="nav-item" onclick="showPage('chinese', this)"><span class="nav-icon">📖</span><span>语文天地</span></div>
@@ -1764,51 +1764,63 @@ function updateHomeStats() {
 }
 
 // =================== 朗读 ===================
-let _voicesLoaded = false;
-let _voicesList = [];
-function loadVoices() {
-  if (!('speechSynthesis' in window)) return;
-  _voicesList = speechSynthesis.getVoices() || [];
-  if (_voicesList.length > 0) _voicesLoaded = true;
-}
-if ('speechSynthesis' in window) {
-  loadVoices();
-  // Chrome 需要监听 voiceschanged 事件
-  if (typeof speechSynthesis.onvoiceschanged !== 'undefined') {
-    speechSynthesis.onvoiceschanged = loadVoices;
-  }
-}
+var _ttsAudio = null; // 音频回退方案
 
 function speakText(text) {
-  if (!('speechSynthesis' in window)) {
-    toast('当前浏览器不支持语音朗读');
-    return;
-  }
+  // 方式1: 尝试 Web Speech API
   try {
-    speechSynthesis.cancel();
-    // 等待声音列表加载
-    if (!_voicesLoaded) loadVoices();
-    let u = new SpeechSynthesisUtterance(text);
-    u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-CN' : 'en-US';
-    u.rate = 0.8;
-    u.pitch = 1;
-    u.volume = 1;
-    // 找一个匹配语言的中文/英文声音
-    if (_voicesList.length > 0) {
-      const langPrefix = u.lang.slice(0,2);
-      const matched = _voicesList.find(v => v.lang && v.lang.startsWith(langPrefix));
-      if (matched) u.voice = matched;
+    if (typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = /[\u4e00-\u9fa5]/.test(text) ? 'zh-CN' : 'en-US';
+      u.rate = 0.8;
+      u.pitch = 1;
+      u.volume = 1;
+      
+      // 尝试加载声音列表
+      var voices = [];
+      try { voices = window.speechSynthesis.getVoices() || []; } catch(e2) {}
+      if (voices.length > 0) {
+        var langPrefix = u.lang.slice(0,2);
+        for (var vi = 0; vi < voices.length; vi++) {
+          if (voices[vi].lang && voices[vi].lang.indexOf(langPrefix) === 0) {
+            u.voice = voices[vi];
+            break;
+          }
+        }
+      }
+      
+      u.onerror = function() { ttsFallback(text); };
+      window.speechSynthesis.speak(u);
+      // 唤醒
+      setTimeout(function() {
+        try { if (window.speechSynthesis.speaking === false && window.speechSynthesis.pending === false) ttsFallback(text); } catch(e3) {}
+      }, 500);
+      return;
     }
-    u.onerror = (e) => {
-      console.warn('朗读出错:', e);
-      toast('朗读失败，请重试或检查浏览器设置');
-    };
-    speechSynthesis.speak(u);
-    // 部分浏览器需要 resume 唤醒
-    setTimeout(() => { if (speechSynthesis.paused) speechSynthesis.resume(); }, 100);
-  } catch (err) {
-    console.error(err);
-    toast('朗读功能异常');
+  } catch(e) {
+    console.warn('Web Speech API failed:', e);
+  }
+  
+  // 方式2: 回退到音频TTS
+  ttsFallback(text);
+}
+
+function ttsFallback(text) {
+  // 如果文字太长，截断
+  var t = text.substring(0, 200);
+  var lang = /[\u4e00-\u9fa5]/.test(t) ? 'zh-CN' : 'en-US';
+  var url = 'https://tts.baidu.com/text2audio?lan=' + (lang === 'zh-CN' ? 'zh' : 'en') + '&text=' + encodeURIComponent(t);
+  
+  try {
+    if (!_ttsAudio) _ttsAudio = new Audio();
+    _ttsAudio.src = url;
+    _ttsAudio.play().catch(function() {
+      // 方式3: 用新窗口打开
+      toast('语音播放需要联网，请检查网络连接');
+    });
+  } catch(err) {
+    toast('语音播放失败，请检查网络');
   }
 }
 
