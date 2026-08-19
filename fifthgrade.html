@@ -300,7 +300,6 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="poems" onclick="switchPanel('poems')">
       <span class="icon">📜</span><span class="label">古诗诵读</span>
     </div>
-    <div class="nav-divider"></div>
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
@@ -1176,30 +1175,33 @@ function renderChars() {
   const saved = state.imitations[state.day] || new Array(imi.examples.length).fill('');
   let html = data.map((item, i) => `
     <div class="char-card">
-      <button class="speak-btn" onclick="speak('${item.c}')">🔊</button>
+      <button class="speak-btn" data-speak="${i}">🔊</button>
       <div class="char">${item.c}</div>
       <div class="pinyin">${item.p}</div>
       <div class="word">${item.w}</div>
     </div>
   `).join('');
-  
+  // 存储文本供按钮读取，避免特殊字符破坏onclick
+  var _charTexts = data.map(item => item.c);
+
   let imiHtml = imi.examples.map((ex, i) => `
     <div style="background:#f8f9fc;padding:14px;border-radius:12px;margin-bottom:12px;border-left:4px solid var(--primary)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
         <span style="background:var(--primary);color:#fff;padding:3px 10px;border-radius:10px;font-size:13px;font-weight:700">范例${i+1}</span>
-        <button class="speak-btn" onclick="speak('${ex}')">🔊</button>
+        <button class="speak-btn" data-speak-imi="${i}">🔊</button>
       </div>
       <div style="font-size:15px;line-height:1.8;color:#333;margin-bottom:10px;font-family:inherit">${ex}</div>
       <div style="font-size:12px;color:#888;margin-bottom:4px">✏️ 请模仿上面的${imi.type}，自己写一句：</div>
       <textarea id="imi-${i}" placeholder="在此输入你的模仿句..." style="width:100%;min-height:60px;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:15px;font-family:inherit" oninput="saveImi(${i}, this.value)">${saved[i] || ''}</textarea>
     </div>
   `).join('');
+  var _imiTexts = imi.examples.slice();
 
   c.innerHTML = `
     <div class="card">
       <div class="card-title">📖 今日生字（五年级上册）</div>
       <div class="card-subtitle">第${state.day}天 · 共${data.length}个生字 · 点击🔊朗读</div>
-      <button class="btn btn-primary" onclick="speakSeq([${data.map(d=>`'${d.c} ${d.p} ${d.w}'`).join(',')}])">🔊 连续朗读全部</button>
+      <button class="btn btn-primary" id="speakAllChars">🔊 连续朗读全部</button>
     </div>
     <div class="char-grid">${html}</div>
     <div class="card">
@@ -1212,6 +1214,22 @@ function renderChars() {
     </div>
     <div class="card">${renderCheckinBtn('chars')}</div>
   `;
+  // 绑定朗读按钮（用data属性取文本，避免特殊字符破坏onclick）
+  c.querySelectorAll('[data-speak]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak'));
+      speak(_charTexts[idx]);
+    });
+  });
+  c.querySelectorAll('[data-speak-imi]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-imi'));
+      speak(_imiTexts[idx]);
+    });
+  });
+  document.getElementById('speakAllChars').addEventListener('click', function() {
+    speakSeq(_charTexts.map(function(t, i) { return t + ' ' + data[i].p + ' ' + data[i].w; }));
+  });
 }
 
 function saveImi(idx, val) {
@@ -1396,10 +1414,11 @@ function renderSentences() {
     <div class="sentence-item">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
         <div class="text">${i+1}. ${s}</div>
-        <button class="speak-btn" onclick="speak('${s.replace(/'/g, "\\'")}')">🔊</button>
+        <button class="speak-btn" data-speak-sent="${i}">🔊</button>
       </div>
     </div>
   `).join('');
+  var _sentTexts = data.slice();
   
   // 阅读理解3道题
   const qs = article.questions || [];
@@ -1450,6 +1469,13 @@ function renderSentences() {
   `;
   document.getElementById('speakAllBtn').onclick = () => speakSeq(data);
   document.getElementById('articleSpeakBtn').onclick = () => speak(article.content);
+  // 绑定句子朗读按钮（用data属性取文本，避免特殊字符破坏onclick）
+  c.querySelectorAll('[data-speak-sent]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-sent'));
+      speak(_sentTexts[idx]);
+    });
+  });
 }
 
 function toggleAnswer(idx) {
