@@ -734,7 +734,7 @@ body {
 
 <!-- 左侧导航 -->
 <div class="sidebar">
-  <div class="logo">🌟 小豆包3</div>
+  <div class="logo">🌟 小豆包6</div>
   <div class="logo-sub">一年级学习工作台</div>
   <div class="nav-item active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span><span>首页</span></div>
   <div class="nav-item" onclick="showPage('chinese', this)"><span class="nav-icon">📖</span><span>语文天地</span></div>
@@ -744,7 +744,7 @@ body {
   <div class="nav-item" onclick="showPage('games', this)"><span class="nav-icon">🎮</span><span>游戏乐园</span></div>
   <div class="nav-item" onclick="showPage('checkin', this)"><span class="nav-icon">✅</span><span>打卡计划</span></div>
   <div class="nav-item" onclick="showPage('rewards', this)"><span class="nav-icon">🎁</span><span>奖励商店</span></div>
-  <a class="nav‑link" href="https://1948421773.github.io/github.io/fifthgrade.html" target="_blank">五年级作业</a>
+  <div class="nav-item" onclick="window.open('https://1948421773.github.io/github.io/fifthgrade.html','_blank')"><span class="nav-icon">📝</span><span>五年级作业</span></div>
   
   <div class="score-board">
     <div>我的积分</div>
@@ -759,7 +759,7 @@ body {
 <!-- ============ 首页 ============ -->
 <div class="page active" id="page-home">
   <div class="welcome-banner">
-    <h1>👋 欢迎来到蓉蓉学习3</h1>
+    <h1>👋 欢迎来到蓉蓉学习6</h1>
     <p>每天进步一点点，做个快乐的小学生！</p>
     <div class="date-display" id="todayDate"></div>
   </div>
@@ -868,8 +868,8 @@ body {
 
   <div class="grid-2">
     <div class="card">
-      <div class="card-title">🌟 数感星球</div>
-      <p style="color:#666; margin-bottom:12px;">培养数感小游戏，找出符合条件的数字！</p>
+      <div class="card-title">✖️ 乘法表训练</div>
+      <p style="color:#666; margin-bottom:12px;">九九乘法表练习，看谁算得又快又准！</p>
       <div id="numberSense" style="text-align:center;"></div>
     </div>
     <div class="card">
@@ -1330,32 +1330,44 @@ function clearErrorBook() {
   }
 }
 
-// =================== 数感星球 ===================
+// =================== 乘法表训练 ===================
+let multSubScore = 0;
+let multSubRound = 0;
 function genNumberSense() {
-  let target = 5 + Math.floor(Math.random()*20);
-  let nums = [];
-  while (nums.length < 6) {
-    let n = 1 + Math.floor(Math.random()*40);
-    if (!nums.includes(n)) nums.push(n);
+  multSubRound++;
+  // 九九乘法表范围内出题
+  let a = 1 + Math.floor(Math.random() * 9);
+  let b = 1 + Math.floor(Math.random() * 9);
+  let ans = a * b;
+  let question = a + ' × ' + b + ' = ?';
+  // 生成4个选项
+  let opts = [ans];
+  while (opts.length < 4) {
+    let w = ans + Math.floor(Math.random() * 11) - 5;
+    if (w >= 0 && !opts.includes(w)) opts.push(w);
   }
-  if (!nums.includes(target)) nums[Math.floor(Math.random()*6)] = target;
-  nums.sort(() => Math.random()-0.5);
-  document.getElementById('numberSense').innerHTML = 
-    '<p style="font-size:17px; margin-bottom:12px;">找到数字 <b style="color:var(--orange); font-size:23px;">'+target+'</b></p>'+
-    '<div class="grid-3" style="gap:8px;">'+
-    nums.map(n => '<div class="match-item" style="background:'+(n===target?'#FFF3E0':'#E1F5FE')+'; color:'+(n===target?'#FF8C42':'#0277BD')+';" onclick="senseClick(this,'+(n===target)+')">'+n+'</div>').join('')+
+  opts.sort(() => Math.random() - 0.5);
+  document.getElementById('numberSense').innerHTML =
+    '<div style="font-size:22px; font-weight:bold; color:var(--blue); margin-bottom:8px;">' + question + '</div>' +
+    '<div style="font-size:13px; color:#888; margin-bottom:12px;">第 ' + multSubRound + ' 题 · 答对 ' + multSubScore + ' 题</div>' +
+    '<div class="grid-2" style="gap:8px; max-width:300px; margin:0 auto;">' +
+    opts.map(function(o) {
+      return '<div class="match-item" style="background:#E1F5FE; color:#0277BD; font-size:20px; font-weight:bold;" onclick="senseClick(this,' + o + ',' + ans + ')">' + o + '</div>';
+    }).join('') +
     '</div><p id="senseResult" style="margin-top:12px;"></p>';
 }
-function senseClick(el, correct) {
-  if (correct) {
+function senseClick(el, val, ans) {
+  if (val === ans) {
+    multSubScore++;
     el.style.background = '#6BCB77';
     el.style.color = '#fff';
     document.getElementById('senseResult').innerHTML = '<span style="color:#4CAF50;">🎉 答对了！真棒！</span>';
-    setTimeout(genNumberSense, 1500);
+    setTimeout(genNumberSense, 1200);
   } else {
     el.style.background = '#ff4444';
     el.style.color = '#fff';
-    document.getElementById('senseResult').innerHTML = '<span style="color:#f44336;">再找找看！</span>';
+    document.getElementById('senseResult').innerHTML = '<span style="color:#f44336;">❌ 再算算，正确答案是 ' + ans + '</span>';
+    setTimeout(genNumberSense, 1800);
   }
 }
 
@@ -1595,7 +1607,7 @@ let defaultTasks = [
   {id:4, name:'拼音练习', cat:'语文'},
   {id:5, name:'绘本阅读', cat:'语文'},
   {id:6, name:'40以内计算题', cat:'数学'},
-  {id:7, name:'数感星球', cat:'数学'},
+  {id:7, name:'乘法表训练', cat:'数学'},
   {id:8, name:'思维练习', cat:'数学'},
   {id:9, name:'错题复习', cat:'数学'},
   {id:10, name:'英语短句+单词', cat:'英语'},
@@ -2090,8 +2102,7 @@ function speakText(text) {
   loadTTSVoices();
   var spoken = doSpeak(text, isEnglish);
 
-  // 提示音延迟 200ms：让朗读先"抢占"音频通道
-  setTimeout(function() { playReadSounds(); }, 200);
+  // 只保留朗读，去掉提示音
   showSpeakIndicator(text);
 
   if (!spoken) {
@@ -2127,27 +2138,15 @@ function testSpeech() {
   }
   info += '在线TTS(有道)：✅ 可用（手机也能朗读）\n';
   info += '浏览器：' + navigator.userAgent.substring(0, 45) + '\n\n';
-  info += '点击【确定】后依次播放：\n  · 3声提示音\n  · 中文朗读\n  · 英文朗读';
+  info += '点击【确定】后依次播放：\n  · 中文朗读\n  · 英文朗读';
 
   alert(info);
 
-  try {
-    var AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) {
-      if (!_audioCtx || _audioCtx.state === 'closed') _audioCtx = new AC();
-      if (_audioCtx.state === 'suspended') { var pp = _audioCtx.resume(); if (pp && pp.catch) pp.catch(function(){}); }
-    }
-  } catch(e) {}
-
-  playTone(800, 0.3, 0.35);
-  setTimeout(function() { playTone(600, 0.3, 0.35); }, 400);
-  setTimeout(function() { playTone(1000, 0.4, 0.35); }, 800);
-
-  showSpeakIndicator('语音测试：3声叮 + 中文 + 英文');
+  showSpeakIndicator('语音测试：中文 + 英文');
 
   setTimeout(function() {
     doSpeak('你好小朋友，今天也要加油学习哦！', false);
-  }, 1500);
+  }, 300);
 
   setTimeout(function() {
     doSpeak('Hello! Good morning. Apple, Banana, Cat, Dog. I love you.', true);
