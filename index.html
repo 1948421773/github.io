@@ -1140,9 +1140,15 @@ const newCharsData = [
 ];
 function showNewChars() {
   let arr = newCharsData[getDailyIndex(newCharsData.length)];
-  document.getElementById('newChars').innerHTML = arr.map(c => 
-    '<div class="char-card" onclick="speakText(\''+c.c+'\')"><div class="char-big">'+c.c+'</div><div class="char-pinyin">'+c.p+'</div><div class="char-word">'+c.w+'</div></div>'
+  document.getElementById('newChars').innerHTML = arr.map((c,i) => 
+    '<div class="char-card" data-speak-char="'+i+'"><div class="char-big">'+c.c+'</div><div class="char-pinyin">'+c.p+'</div><div class="char-word">'+c.w+'</div></div>'
   ).join('');
+  document.querySelectorAll('[data-speak-char]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-char'));
+      speakText(arr[idx].c);
+    });
+  });
   document.getElementById('writeGrid').innerHTML = arr.slice(0,8).map(c => 
     '<div class="tian-cell">'+c.c+'</div>'
   ).join('');
@@ -1419,12 +1425,24 @@ const enWordsData = [
 function showEnglish() {
   let sArr = enSentencesData[getDailyIndex(enSentencesData.length)];
   document.getElementById('enSentences').innerHTML = sArr.map((s,i) => 
-    '<div class="en-card"><div class="en-sentence">'+(i+1)+'. '+s.s+' <button class="btn btn-small btn-blue" onclick="speakText(\''+s.s+'\')">🔊</button></div><div class="en-translation">'+s.t+'</div></div>'
+    '<div class="en-card"><div class="en-sentence">'+(i+1)+'. '+s.s+' <button class="btn btn-small btn-blue" data-speak-sent="'+i+'">🔊</button></div><div class="en-translation">'+s.t+'</div></div>'
   ).join('');
+  document.querySelectorAll('[data-speak-sent]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-sent'));
+      speakText(sArr[idx].s);
+    });
+  });
   let wArr = enWordsData[getDailyIndex(enWordsData.length)];
-  document.getElementById('enWords').innerHTML = wArr.map(w => 
-    '<div class="en-word" onclick="speakText(\''+w.w+'\')"><div style="font-size:34px;">'+w.i+'</div><div class="w">'+w.w+'</div><div class="p">/'+w.p+'/</div><div class="m">'+w.m+'</div></div>'
+  document.getElementById('enWords').innerHTML = wArr.map((w,i) => 
+    '<div class="en-word" data-speak-word="'+i+'"><div style="font-size:34px;">'+w.i+'</div><div class="w">'+w.w+'</div><div class="p">/'+w.p+'/</div><div class="m">'+w.m+'</div></div>'
   ).join('');
+  document.querySelectorAll('[data-speak-word]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-word'));
+      speakText(wArr[idx].w);
+    });
+  });
 }
 function speakAllWords() {
   let wArr = enWordsData[getDailyIndex(enWordsData.length)];
