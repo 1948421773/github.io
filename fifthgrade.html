@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>四年级升五年级暑期学习工作台 - 信阳五年级新教材</title>
+<title>四年级升五年级暑期学习工作台6信阳五年级新教材</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -196,7 +196,9 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
 .upload-area .icon { font-size: 36px; margin-bottom: 8px; }
 .upload-area .text { font-size: 14px; color: var(--primary-dark); }
 .upload-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 12px; }
-.upload-preview img { width: 100%; border-radius: 10px; }
+.upload-thumb { position: relative; }
+.upload-thumb img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; }
+.upload-del { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(244,67,54,0.85); color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
 
 .record-btn {
   width: 64px; height: 64px; border-radius: 50%; border: none;
@@ -302,7 +304,7 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
-	<a class="nav‑link" href="https://1948421773.github.io/github.io/index.html" target="_blank">二年级作业</a>
+    <div class="nav-item" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')"><span class="label">二年级</span></div>
     <div class="pet-mini" id="petMini">
       <div class="pet-emoji">🥚</div>
       <div class="pet-lvl">Lv.1</div>
@@ -683,7 +685,7 @@ function speak(text, lang) {
   loadTTSVoices();
   doSpeak(text, isEnglish);
 
-  setTimeout(function() { playReadSounds(); }, 200);
+  // 只保留朗读，去掉提示音
   showSpeakIndicator(text);
 }
 
@@ -701,7 +703,7 @@ function speakSeq(items, lang) {
   }
   loadTTSVoices();
   next();
-  setTimeout(function() { playReadSounds(); }, 200);
+  // 只保留朗读，去掉提示音
   showSpeakIndicator(items[0]);
 }
 
@@ -733,27 +735,16 @@ function testSpeech() {
   }
   info += '在线TTS(有道)：✅ 可用（手机也能朗读）\n';
   info += '浏览器：' + navigator.userAgent.substring(0, 45) + '\n\n';
-  info += '点击【确定】后依次播放：\n  · 3声提示音\n  · 中文朗读\n  · 英文朗读';
+  info += '点击【确定】后依次播放：\n  · 中文朗读\n  · 英文朗读';
   alert(info);
 
-  try {
-    var AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) {
-      if (!_audioCtx || _audioCtx.state === 'closed') _audioCtx = new AC();
-      if (_audioCtx.state === 'suspended') { var pp = _audioCtx.resume(); if (pp && pp.catch) pp.catch(function(){}); }
-    }
-  } catch(e) {}
+  showSpeakIndicator('语音测试：中文 + 英文');
 
-  playTone(800, 0.3, 0.35);
-  setTimeout(function() { playTone(600, 0.3, 0.35); }, 400);
-  setTimeout(function() { playTone(1000, 0.4, 0.35); }, 800);
-  showSpeakIndicator('语音测试：3声叮 + 中文 + 英文');
-
-  setTimeout(function() { doSpeak('你好小朋友，今天也要加油学习哦！', false); }, 1500);
+  setTimeout(function() { doSpeak('你好小朋友，今天也要加油学习哦！', false); }, 300);
   setTimeout(function() {
     doSpeak('Hello! Good morning. Apple, Banana, Cat, Dog. I love you.', true);
     setTimeout(function() { showToast('✅ 语音测试完成'); }, 2500);
-  }, 5000);
+  }, 3500);
 }
 
 // ===================== 提示 =====================
@@ -880,12 +871,34 @@ function handleUpload(input, key) {
   if (!state.uploads[state.day][key]) state.uploads[state.day][key] = [];
   const arr = state.uploads[state.day][key];
   const remain = 6 - arr.length;
-  for (let i = 0; i < Math.min(remain, files.length); i++) {
+  if (remain <= 0) { showToast('最多上传6张照片'); return; }
+  let loaded = 0;
+  const total = Math.min(remain, files.length);
+  for (let i = 0; i < total; i++) {
     const reader = new FileReader();
-    reader.onload = (e) => { arr.push(e.target.result); saveState(); };
+    reader.onload = (e) => {
+      arr.push(e.target.result);
+      saveState();
+      loaded++;
+      if (loaded === total) {
+        showToast('上传成功 ✓');
+        // 重新渲染当前面板，让预览图立即显示
+        switchPanel(currentPanel);
+      }
+    };
     reader.readAsDataURL(files[i]);
   }
-  showToast('上传成功 ✓');
+  // 清空input，允许重复选择同一文件
+  input.value = '';
+}
+
+function deleteUpload(day, key, idx) {
+  if (state.uploads[day] && state.uploads[day][key]) {
+    state.uploads[day][key].splice(idx, 1);
+    if (state.uploads[day][key].length === 0) delete state.uploads[day][key];
+    saveState();
+    switchPanel(currentPanel);
+  }
 }
 
 // ===================== 导航 =====================
@@ -958,16 +971,18 @@ function renderUploadArea(key, label) {
   const uploads = (state.uploads[state.day] && state.uploads[state.day][key]) || [];
   let preview = '';
   if (uploads.length) {
-    preview = '<div class="upload-preview">' + uploads.map(u => `<img src="${u}">`).join('') + '</div>';
+    preview = '<div class="upload-preview">' + uploads.map((u, idx) =>
+      `<div class="upload-thumb"><img src="${u}"><button class="upload-del" onclick="deleteUpload(${state.day},'${key}',${idx})">✕</button></div>`
+    ).join('') + '</div>';
   }
   return `
     <div class="card">
       <div class="card-title">📸 ${label}拍照打卡</div>
-      <label class="upload-area">
+      <div class="upload-area" onclick="document.getElementById('uploadInput-${key}').click()">
         <div class="icon">📷</div>
-        <div class="text">点击拍照或选择照片上传作业</div>
-        <input type="file" accept="image/*" capture="camera" multiple style="display:none" onchange="handleUpload(this,'${key}')">
-      </label>
+        <div class="text">点击拍照或选择照片上传作业（最多6张）</div>
+      </div>
+      <input type="file" id="uploadInput-${key}" accept="image/*" capture="camera" multiple style="display:none" onchange="handleUpload(this,'${key}')">
       ${preview}
     </div>
   `;
