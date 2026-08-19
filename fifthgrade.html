@@ -1684,12 +1684,13 @@ function renderWords() {
   const data = getWordData();
   let html = data.map((w,i) => `
     <div class="word-card">
-      <button class="speak-btn" onclick="speak('${w.en}','en-US')">🔊</button>
+      <button class="speak-btn" data-speak-word="${i}">🔊</button>
       <div class="en">${w.en}</div>
       <div class="ph">/${w.ph}/</div>
       <div class="cn">${w.cn}</div>
     </div>
   `).join('');
+  var _wordTexts = data.map(w => w.en);
   c.innerHTML = `
     <div class="card">
       <div class="card-title">🔤 今日英语单词（新概念）</div>
@@ -1706,6 +1707,12 @@ function renderWords() {
     ${renderUploadArea('words','单词默写')}
     <div class="card">${renderCheckinBtn('words')}</div>
   `;
+  c.querySelectorAll('[data-speak-word]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-word'));
+      speak(_wordTexts[idx], 'en-US');
+    });
+  });
 }
 function startDictation() {
   const data = getWordData();
@@ -1750,7 +1757,8 @@ function getReadingData() {
 function renderReading() {
   const c = document.getElementById('content');
   const r = getReadingData();
-  let wordHtml = r.words.map(w => `<span class="new-word" onclick="speak('${w.en}','en-US')">${w.en}(${w.cn})</span>`).join(' ');
+  let wordHtml = r.words.map((w,i) => `<span class="new-word" data-speak-rd="${i}">${w.en}(${w.cn})</span>`).join(' ');
+  var _rdWordTexts = r.words.map(w => w.en);
   c.innerHTML = `
     <div class="card">
       <div class="card-title">📗 今日英语阅读</div>
@@ -1766,6 +1774,12 @@ function renderReading() {
     <div class="card">${renderCheckinBtn('reading')}</div>
   `;
   document.getElementById('readAloudBtn').onclick = () => speak(r.text, 'en-US');
+  c.querySelectorAll('[data-speak-rd]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-speak-rd'));
+      speak(_rdWordTexts[idx], 'en-US');
+    });
+  });
 }
 
 // ===================== 物理入门 =====================
@@ -1916,7 +1930,7 @@ function renderPoems() {
     <div class="card">
       <div class="card-title">📜 今日古诗</div>
       <div class="card-subtitle">第${state.day}天 · ${p.dynasty}·${p.author}《${p.title}》</div>
-      <button class="btn btn-primary" onclick="speakSeq(['${p.title}','${poemText}'],'zh-CN')">🔊 朗读全诗</button>
+      <button class="btn btn-primary" id="poemSpeakBtn">🔊 朗读全诗</button>
     </div>
     <div class="card" style="text-align:center;padding:30px">
       <h2 style="font-size:28px;margin-bottom:6px">${p.title}</h2>
@@ -1930,6 +1944,7 @@ function renderPoems() {
     ${renderRecordArea('poems','古诗诵读')}
     <div class="card">${renderCheckinBtn('poems')}</div>
   `;
+  document.getElementById('poemSpeakBtn').onclick = () => speakSeq([p.title, poemText], 'zh-CN');
 }
 
 // ===================== 宠物中心 =====================
