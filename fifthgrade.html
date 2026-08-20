@@ -304,7 +304,7 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
-    <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')"><span class="label">跳转二年级</div>
+    <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')"><span class="label">跳转二年级></div>
     <div class="pet-mini" id="petMini">
       <div class="pet-emoji">🥚</div>
       <div class="pet-lvl">Lv.1</div>
@@ -1779,11 +1779,9 @@ function renderReading() {
     <div class="card">${renderCheckinBtn('reading')}</div>
   `;
   document.getElementById('readAloudBtn').onclick = () => {
-    // 按句子拆分逐句朗读：长文本直接交给 speechSynthesis 容易整体无声（短「生词」正常），
-    // 拆成短句后每一句都走与「生词」相同的短文本通道，兼容性最好；每句仍保留在线 TTS 兜底
-    var parts = r.text.match(/[^.!?]+[.!?]+/g);
-    if (!parts || parts.length <= 1) { speak(r.text, 'en-US'); return; }
-    speakSeq(parts.map(function(s){ return s.trim(); }), 'en-US');
+    // 整段一次性朗读（单条语音，连续不卡顿）：直接交给 Web Speech 读全文，
+    // 若浏览器对该长文本「假开始」无声，doSpeak 内的兜底会自动切到在线 TTS（仍是整段连续音频）
+    speak(r.text, 'en-US');
   };
   c.querySelectorAll('[data-speak-rd]').forEach(function(el) {
     el.addEventListener('click', function() {
