@@ -304,7 +304,7 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
-    <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')" style="font-size:14px;"><span class="label">跳转二年级></div>
+    <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')"><span class="label">跳转二年级</div>
     <div class="pet-mini" id="petMini">
       <div class="pet-emoji">🥚</div>
       <div class="pet-lvl">Lv.1</div>
@@ -623,7 +623,10 @@ function doSpeak(text, isEnglish, onend) {
       var fbTimer = null;
       var _onend = onend;
       var startedAt = 0;
-      var minExpectedMs = !isEnglish ? estimateChineseMinMs(text) : 300;
+      // 英文按词数估算（约 330ms/词），中文按字数估算；避免长英文被误判，也避免「假开始」漏判
+      var minExpectedMs = isEnglish
+        ? Math.max(900, (text.match(/[a-zA-Z]+/g) || []).length * 330)
+        : estimateChineseMinMs(text);
       var fallbackDone = false;
 
       u.onstart = function() {
@@ -633,13 +636,14 @@ function doSpeak(text, isEnglish, onend) {
       };
       u.onend = function() {
         if (fbTimer) { clearTimeout(fbTimer); fbTimer = null; }
-        // 兜底：中文 onend 比预估时间快很多（< 40%）就判定是空播放假阳性，立即 fallback 在线 TTS
-        if (!fallbackDone && started && !isEnglish && startedAt > 0) {
+        // 兜底：若 onend 远比预估时长来得快（< 40%），判定为「假开始·无声」假阳性，立即 fallback 在线 TTS
+        // 中英文都生效（此前仅中文生效，导致英文「朗读全文」假开始时无法回退而完全无声）
+        if (!fallbackDone && started && startedAt > 0) {
           var elapsed = Date.now() - startedAt;
           if (elapsed < minExpectedMs * 0.4) {
             fallbackDone = true;
             try { window.speechSynthesis.cancel(); } catch(e) {}
-            speakWithOnlineTTS(text, false, _onend);
+            speakWithOnlineTTS(text, isEnglish, _onend);
             return;
           }
         }
@@ -1774,7 +1778,13 @@ function renderReading() {
     ${renderRecordArea('reading','课文朗读')}
     <div class="card">${renderCheckinBtn('reading')}</div>
   `;
-  document.getElementById('readAloudBtn').onclick = () => speak(r.text, 'en-US');
+  document.getElementById('readAloudBtn').onclick = () => {
+    // 按句子拆分逐句朗读：长文本直接交给 speechSynthesis 容易整体无声（短「生词」正常），
+    // 拆成短句后每一句都走与「生词」相同的短文本通道，兼容性最好；每句仍保留在线 TTS 兜底
+    var parts = r.text.match(/[^.!?]+[.!?]+/g);
+    if (!parts || parts.length <= 1) { speak(r.text, 'en-US'); return; }
+    speakSeq(parts.map(function(s){ return s.trim(); }), 'en-US');
+  };
   c.querySelectorAll('[data-speak-rd]').forEach(function(el) {
     el.addEventListener('click', function() {
       var idx = parseInt(this.getAttribute('data-speak-rd'));
