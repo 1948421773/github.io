@@ -250,6 +250,24 @@ body {
 .option:hover { background: var(--green); color: #fff; }
 .option.correct { background: var(--green); color: #fff; }
 .option.wrong { background: #ff4444; color: #fff; }
+/* 拼音选项上的发音按钮 */
+.py-spk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 50%;
+  background: #e3f2fd;
+  color: #2196f3;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s;
+}
+.py-spk:hover { background: #2196f3; color: #fff; }
+.py-spk:active { transform: scale(0.9); }
 /* 数学 */
 .math-q {
   background: #FFF3E0;
@@ -744,7 +762,7 @@ body {
   <div class="nav-item" onclick="showPage('games', this)"><span class="nav-icon">🎮</span><span>游戏乐园</span></div>
   <div class="nav-item" onclick="showPage('checkin', this)"><span class="nav-icon">✅</span><span>打卡计划</span></div>
   <div class="nav-item" onclick="showPage('rewards', this)"><span class="nav-icon">🎁</span><span>奖励商店</span></div>
-  <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/fifthgrade.html','_blank')" style="font-size:10px;">跳转五年级></div>
+  <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/fifthgrade.html','_blank')"><span class="label" style="font-size:10px;">跳五年级</span></div>
   <div class="score-board">
     <div>我的积分</div>
     <div class="score-num" id="totalScore">0</div>
@@ -1182,7 +1200,8 @@ function genPinyinPractice() {
   pinyinQs = shuffled;
   document.getElementById('pinyinPractice').innerHTML = shuffled.map((q,i) => 
     '<div class="pinyin-q"><div class="q">'+(i+1)+'. '+q.q+'</div><div class="options">'+
-    q.opts.map((o,j) => '<div class="option" data-q="'+i+'" data-a="'+j+'" onclick="selectPinyin(this)">'+o+'</div>').join('')+
+    q.opts.map((o,j) => '<div class="option" data-q="'+i+'" data-a="'+j+'" onclick="selectPinyin(this)">'+o+
+      '<span class="py-spk" title="播放拼音" data-py="'+o+'" onclick="playPinyin(event,this)">🔊</span></div>').join('')+
     '</div></div>'
   ).join('');
 }
@@ -1190,6 +1209,14 @@ function selectPinyin(el) {
   let q = el.dataset.q, a = el.dataset.a;
   document.querySelectorAll('[data-q="'+q+'"]').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
+}
+// 点击🔊播放该拼音：用百度中文通道朗读带声调的拼音（百度会按声调正确发音，如 mā=妈）
+// 各声调音频不同，可帮助孩子区分 mā/má/mǎ/mà 等；播放发生在点击手势内，浏览器允许自动播放
+function playPinyin(ev, el) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  var p = el.getAttribute('data-py');
+  if (!p) return;
+  speakWithOnlineTTS(p, false, null);
 }
 function checkPinyin() {
   pinyinQs.forEach((q,i) => {
