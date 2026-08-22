@@ -304,7 +304,7 @@ body { background: var(--bg); color: var(--text); overflow: hidden; }
     <div class="nav-item" data-panel="pet" onclick="switchPanel('pet')">
       <span class="icon">🐾</span><span class="label">小宠物</span>
     </div>
-    <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')" style="font-size:10px;><span class="label"">跳二年级</div>
+    <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/index.html','_blank')"><span class="label" style="font-size:10px;">跳二年级></div>
     <div class="pet-mini" id="petMini">
       <div class="pet-emoji">🥚</div>
       <div class="pet-lvl">Lv.1</div>
@@ -448,6 +448,31 @@ document.addEventListener('click', warmupAudio, { once: false, capture: true });
 document.addEventListener('keydown', warmupAudio, { once: true });
 document.addEventListener('touchstart', warmupAudio, { once: true, passive: true });
 
+// ---------- iOS Safari 音频解锁 ----------
+// iOS 硬规则：<audio> 元素必须先在某个用户手势内真实播放过一次，后续 play() 才被允许；
+// 否则系统直接拦截、完全静音（桌面端无此限制）。移动端中文/拼音走「短路直连在线 TTS」分支，
+// 跳过了 doSpeak 里的静音 prime，所以这里在首个手势统一播放一段静音来永久解锁媒体播放。
+var _iosAudioUnlocked = false;
+function unlockIOSAudio() {
+  if (_iosAudioUnlocked) return;
+  _iosAudioUnlocked = true;
+  try {
+    var a = getSharedTTSAudio();
+    if (a) {
+      a.src = _SILENT_MP3;
+      var p = a.play();
+      if (p && typeof p.then === 'function') {
+        p.then(function(){ try { a.pause(); a.currentTime = 0; } catch(e){} }).catch(function(){});
+      }
+    }
+  } catch(e) {}
+}
+// touchstart 在 iOS 上早于 click 触发，确保点 🔊 之前已经解锁媒体播放
+document.addEventListener('touchstart', unlockIOSAudio, { passive: true });
+document.addEventListener('touchend', unlockIOSAudio, { passive: true });
+document.addEventListener('mousedown', unlockIOSAudio, false);
+document.addEventListener('click', unlockIOSAudio, false);
+
 function getAudioCtx() {
   try {
     var AC = window.AudioContext || window.webkitAudioContext;
@@ -497,6 +522,7 @@ function getSharedTTSAudio() {
       _sharedTTSAudio.id = '_ttsAudio';
       _sharedTTSAudio.style.display = 'none';
       _sharedTTSAudio.preload = 'auto';
+      try { _sharedTTSAudio.setAttribute('playsinline', ''); _sharedTTSAudio.setAttribute('webkit-playsinline', ''); } catch(e) {}
       document.body.appendChild(_sharedTTSAudio);
     } catch(e) { return null; }
   }
@@ -518,9 +544,54 @@ function buildOnlineTTSUrl(text, isEnglish) {
   return 'https://fanyi.baidu.com/gettts?lan=zh&text=' + encoded + '&spd=4&source=web';
 }
 
+// ---------- iOS 专用：系统原生语音合成（speechSynthesis） ----------
+// iOS Safari 对 <audio> 在线 TTS 经常静默拦截（尤其本地 file:// 打开时跨域/策略限制），
+// 而系统原生 speechSynthesis 是 iOS 自带 TTS，无需联网音频、无需解锁，最可靠。
+function isIOSDevice() {
+  return /iPad|iPhone|iPod/i.test(navigator.userAgent || '') ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function nativeSpeak(text, lang, onend) {
+  try {
+    var synth = window.speechSynthesis;
+    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') {
+      speakWithOnlineTTS(text, lang === 'en-US', onend);
+      return;
+    }
+    try { if (synth.paused) synth.resume(); } catch(e) {}
+    var parts = [text];
+    // 长文本按句拆分，规避 iOS 单条语音约 15 秒截断的已知问题
+    if (text && text.length > 120) {
+      var m = text.match(/[^。！？.!?]+[。！？.!?]*/g);
+      if (m && m.length > 1) parts = m.map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+    }
+    var i = 0;
+    function speakOne() {
+      if (i >= parts.length) { if (onend) onend(); return; }
+      var t = parts[i++];
+      var u = new SpeechSynthesisUtterance(t);
+      u.lang = lang || 'zh-CN';
+      u.rate = (lang === 'en-US') ? 0.92 : 0.85;
+      u.pitch = 1; u.volume = 1;
+      u.onend = function(){ speakOne(); };
+      u.onerror = function(){ speakOne(); };
+      synth.speak(u);
+    }
+    speakOne();
+  } catch (e) {
+    speakWithOnlineTTS(text, lang === 'en-US', onend);
+  }
+}
+
 function speakWithOnlineTTS(text, isEnglish, onend) {
   try {
+    // iOS 设备：改用系统原生语音合成，绕过 <audio> 在线 TTS 的静默拦截（本地 file:// 打开时尤其必要）
+    if (isIOSDevice() && window.speechSynthesis) {
+      nativeSpeak(text, isEnglish ? 'en-US' : 'zh-CN', onend);
+      return;
+    }
     var url = buildOnlineTTSUrl(text, isEnglish);
+    if (!_iosAudioUnlocked) { try { unlockIOSAudio(); } catch(e) {} }
     var audio = getSharedTTSAudio();
     if (!audio) { if (onend) onend(); return false; }
     try { audio.pause(); } catch(e) {}
