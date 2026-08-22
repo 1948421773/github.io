@@ -762,7 +762,7 @@ body {
   <div class="nav-item" onclick="showPage('games', this)"><span class="nav-icon">🎮</span><span>游戏乐园</span></div>
   <div class="nav-item" onclick="showPage('checkin', this)"><span class="nav-icon">✅</span><span>打卡计划</span></div>
   <div class="nav-item" onclick="showPage('rewards', this)"><span class="nav-icon">🎁</span><span>奖励商店</span></div>
-  <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/fifthgrade.html','_blank')" style="font-size:10px;><span class="label"">五年级</div>
+  <div class="nav-item text-only" onclick="window.open('https://1948421773.github.io/github.io/fifthgrade.html','_blank')"><span class="label" style="font-size:10px;">跳五年级</span></div>
   <div class="score-board">
     <div>我的积分</div>
     <div class="score-num" id="totalScore">0</div>
@@ -1903,6 +1903,31 @@ document.addEventListener('click', warmupAudio, { once: false, capture: true });
 document.addEventListener('keydown', warmupAudio, { once: true });
 document.addEventListener('touchstart', warmupAudio, { once: true, passive: true });
 
+// ---------- iOS Safari 音频解锁 ----------
+// iOS 硬规则：<audio> 元素必须先在某个用户手势内真实播放过一次，后续 play() 才被允许；
+// 否则系统直接拦截、完全静音（桌面端无此限制）。移动端中文/拼音走「短路直连在线 TTS」分支，
+// 跳过了 doSpeak 里的静音 prime，所以这里在首个手势统一播放一段静音来永久解锁媒体播放。
+var _iosAudioUnlocked = false;
+function unlockIOSAudio() {
+  if (_iosAudioUnlocked) return;
+  _iosAudioUnlocked = true;
+  try {
+    var a = getSharedTTSAudio();
+    if (a) {
+      a.src = _SILENT_MP3;
+      var p = a.play();
+      if (p && typeof p.then === 'function') {
+        p.then(function(){ try { a.pause(); a.currentTime = 0; } catch(e){} }).catch(function(){});
+      }
+    }
+  } catch(e) {}
+}
+// touchstart 在 iOS 上早于 click 触发，确保点 🔊 之前已经解锁媒体播放
+document.addEventListener('touchstart', unlockIOSAudio, { passive: true });
+document.addEventListener('touchend', unlockIOSAudio, { passive: true });
+document.addEventListener('mousedown', unlockIOSAudio, false);
+document.addEventListener('click', unlockIOSAudio, false);
+
 // 获取/创建 AudioContext（参照语音测试.html的可靠实现）
 function getAudioCtx() {
   try {
@@ -1963,6 +1988,7 @@ function getSharedTTSAudio() {
       _sharedTTSAudio.id = '_ttsAudio';
       _sharedTTSAudio.style.display = 'none';
       _sharedTTSAudio.preload = 'auto';
+      try { _sharedTTSAudio.setAttribute('playsinline', ''); _sharedTTSAudio.setAttribute('webkit-playsinline', ''); } catch(e) {}
       document.body.appendChild(_sharedTTSAudio);
     } catch(e) { return null; }
   }
@@ -1990,6 +2016,7 @@ function buildOnlineTTSUrl_backup(text) {
 function speakWithOnlineTTS(text, isEnglish, onend) {
   try {
     var url = buildOnlineTTSUrl(text, isEnglish);
+    if (!_iosAudioUnlocked) { try { unlockIOSAudio(); } catch(e) {} }
     var audio = getSharedTTSAudio();
     if (!audio) { if (onend) onend(); return false; }
     try { audio.pause(); } catch(e) {}
